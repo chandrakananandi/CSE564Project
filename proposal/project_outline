@@ -1,0 +1,25 @@
+problem definition
+motivation
+planned approach
+evaluation
+
+list of milestones and dates:
+
+
+------------------------------------
+milestones:
+1. architecture, policies are on paper DONE  
+2. implement the architecture and atleast one of each interface: by 2/8/2016 and think about how to implement the checkers by 2/11/2016
+3. implement the control policy checker: 2/18/2016
+4. implement the dependency policy checker: 3/1/2016
+5. evaluation: verify policies for 2: 3/10/2016
+6. presentation and report: 3/10/2016-3/14/2016
+
+
+
+TODO: make a repository in github and send Jeanette the link: jdaum
+      make a draft of the proposal and add it to the repository too.
+      add this document
+
+ 
+
