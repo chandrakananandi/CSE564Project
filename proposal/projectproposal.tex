@@ -1,19 +1,61 @@
 \documentclass{article}
 \usepackage{fullpage}
 \usepackage[english]{babel}
+\usepackage{url}
 \begin{document}
 
 \begin{center}
 \LARGE\textbf {CSE 564 Project Proposal}\\
-\large Jeanette Daum (jdaum), Chandrakana Nandi (cnandi)
+\large Chandrakana Nandi (cnandi), Jeanette Daum (jdaum)
 \end{center}
 \begin{center}
-Title: \textbf{Specifying and Verifying Security Policies for Home Automation}
+\large Title: \textbf{Specifying and Verifying Security Policies for Smart Homes}
 \end{center}
 
-\section{Problem definition}
 \section{Motivation}
+Smart homes are becoming popular as one of the applications of Internet of Things. Typically, a smart home consists of devices interacting with each other and taking actions autonomously or being controlled remotely by the home inhabitants. In this project, we consider a smart home to be a collection of interacting devices acting autonomously without requiring the user to intervene. A challenge for smart homes is to ensure that there are no security loopholes because they can be exploited by malicious attackers to take control of the house and harm the inhabitants~\cite{yoshi, jung}. Before smart homes become as widespread as smart phones are today, it is necessary for the home automation industry to address these concerns.
+
+\section{Problem definition}
+Verifying security and correctness for home automation systems is very important because violation of security can have a negative impact on the lives of the home inhabitants. In this project, our goal is to ensure that a system of interacting smart devices satisfies a set of security properties. We aim to solve the problem of security for smart homes from the point of view of the manufacturers of the smart devices so that they can claim that their devices are verified to be secure and correct and the end users can rely on them. 
+We will focus on the security of the devices and not on the lower level details of a home automation system such as the communication protocols. Some solutions for ensuring security of smart homes have been proposed but they are either too general and do not address the problems specific to smart homes~\cite{semantec} or are based on dynamic techniques~\cite{al2000secure}. The problem with the latter is that if a security loophole is encountered, then the system has to be stopped which makes it unreliable. Our approach will be static providing compile time guarantees that the system satisfies a set of security specifications and will also be more expressive than the existing solutions in the sense that it will allow us to specify many different types of security properties.   
+
 \section{Planned approach}
+\label{sec:plannedapp}
+Following is our plan of action for this project:
+\begin{enumerate}
+\item We already did a survey of the existing home automation platforms and found that most of them are closed-source~\cite{homeos, echo, wink, homekit, samsung}.  
+\item Based on our finding, we have decided to implement our own prototype. To this end, we have designed a high level architecture for modelling smart homes which abstracts away the lower level details such as the communication protocols used by the devices but is expressive enough to model the existing smart systems. 
+\item  We have formalized three types of security and correctness policies for a smart home to satisfy. 
+\item Based on our architecture, we will implement a platform for developing smart devices.
+\item We will design and implement algorithms for verifying the policies.
+\item For evaluating our tools, we will develop prototypes of smart systems for which we will specify security policies and verify them.
+\end{enumerate}
+
 \section{Evaluation}
+One of our major contributions will be a high-level architecture for modelling smart homes. We plan to implement a platform based on our architecture and prototypes of smart devices to be executed on that platform. To evaluate the verification tools we plan to develop, we will use these prototypes. 
+
+Further, as mentioned in section~\ref{sec:plannedapp}, most of the existing home automation platforms are closed-source. Contacting their manufacturers/developers and requesting them to give us access to the source code, then understanding the code and finally being able to implement tools for verifying it in 8 weeks (which is the amount of time we have remaining) is not feasible because it takes a lot of time to come to any agreement with the companies and it is also risky to rely on their support for getting their platforms to work.    
+
 \section{Milestones and dates}
+Items 1, 2 and 3 mentioned in section~\ref{sec:plannedapp} have already been accomplished. 
+Following are the milestones we aim to meet in the remaining 8 weeks and the corresponding dates:
+\begin{table}
+\begin{center}
+\begin{tabular}{|p{5cm}|p{2cm}|}
+\hline 
+milestone & date \\ \hline
+Implement a platform for developing smart devices based on our smart home architecture and  two to three sub-systems to be used for evaluation later & 2/8/2016 \\\hline
+Design algorithms for verifying the three types of security policies & 2/11/2016 \\\hline
+Implement the algorithm for the first policy & 2/18/2016 \\\hline
+Implement the algorithm for the second policy and prepare the draft of the project report & 3/1/2016  \\\hline
+Implement the algorithm for the third policy and verify all the policies for the benchmarks & 3/10/2016 \\\hline
+Write the final report and prepare the presentation & 3/14/2016 \\\hline
+
+\end{tabular}
+\end{center}
+\end{table}
+
+
+\bibliographystyle{abbrv}
+\bibliography{project}
 \end{document}
