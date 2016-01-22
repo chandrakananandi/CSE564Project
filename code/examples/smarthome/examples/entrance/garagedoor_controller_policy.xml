@@ -1,0 +1,26 @@
+<?xml version = "1.0" encoding ="UTF-8"?>
+<controller name = "garagedoor-controller">
+    <command name= "open_garagedoor">
+        <sensor name = "IS_GARAGE_OPEN" value = "false"/>
+        <sensor name = "IS_CAR_INSIDE_GARAGE" value ="false"/>
+        <sensor name = "CAR_DISTANCE" value = "<=50"/>
+        <sensor name = "CAR_SPEED" value = "!0"/>
+        <sensor name = "IS_OWNER_INSIDE_CAR" value = "true">
+   </command>
+   <command name= "open_garagedoor">
+        <sensor name = "IS_GARAGE_OPEN" value = "false"/>
+        <sensor name = "IS_CAR_INSIDE_GARAGE" value ="true"/>
+        <sensor name = "IS_CAR_RUNNING" value = "true"/>
+        <sensor name = "IS_OWNER_INSIDE_CAR" value = "true">
+   </command>
+   <command name= "close_garagedoor">
+        <sensor name = "IS_GARAGE_OPEN" value = "true"/>
+        <sensor name = "IS_CAR_INSIDE_GARAGE" value ="false"/>
+        <sensor name = "CAR_DISTANCE" value ="50m"/>
+   </command> 
+   <command name= "close_garagedoor">
+        <sensor name = "IS_GARAGE_OPEN" value = "true"/>
+        <sensor name = "IS_CAR_INSIDE_GARAGE" value ="true"/>
+        <sensor name = "IS_CAR_RUNNING" value ="false"/>
+   </command>               
+</controller>
