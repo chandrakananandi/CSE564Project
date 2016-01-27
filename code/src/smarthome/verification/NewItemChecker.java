@@ -1,8 +1,6 @@
 package smarthome.verification;
 
-import policychecker.ControlChecker;
-import policychecker.DependencyChecker;
-import smarthome.item.Item;
+import smarthome.core.Item;
 
 public class NewItemChecker {
 

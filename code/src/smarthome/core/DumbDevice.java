@@ -1,8 +1,4 @@
-package smarthome.item;
-
-import item.Controller;
-import item.Item;
-import message.Command;
+package smarthome.core;
 
 public abstract class DumbDevice implements Item {
 

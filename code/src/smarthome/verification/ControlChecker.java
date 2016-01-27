@@ -1,6 +1,6 @@
 package smarthome.verification;
 
-import smarthome.item.Item;
+import smarthome.core.Item;
 
 public class ControlChecker {
 

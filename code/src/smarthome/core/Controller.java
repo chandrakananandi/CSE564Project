@@ -1,13 +1,21 @@
-package smarthome.item;
+package smarthome.core;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
-import item.Controller;
-import item.DumbDevice;
-import item.Item;
-import item.Sensor;
-import message.Command;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
 import smarthome.pair.Pair;
 
 public abstract class Controller implements Item {
@@ -33,7 +41,6 @@ public abstract class Controller implements Item {
         for (int x = 0; x < dd_comm_pair.size(); x++) {
             ret.add(dd_comm_pair.get(x).getDumbDevice());
         }
-
         return ret;
     }
 
@@ -41,8 +48,28 @@ public abstract class Controller implements Item {
      * get the list of sensors on which this controller relies. This is obtained by parsing the dependency policy file.
      *
      * @return
+     * @throws ParserConfigurationException
+     * @throws IOException
+     * @throws SAXException
      */
-    public abstract ArrayList<Sensor> getSensors();
+    public Set<String> getSensors(String xmlFileControllerName)
+            throws ParserConfigurationException, SAXException, IOException {
+
+        Set<String> sensorname_list = new HashSet<String>();
+
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = factory.newDocumentBuilder();
+
+        Document document = builder.parse(xmlFileControllerName.concat("_policy.xml"));
+        document.getDocumentElement().normalize();
+        NodeList nodelist = document.getElementsByTagName("sensor");
+        for (int x = 0; x < nodelist.getLength(); x++) {
+            Node node = nodelist.item(x);
+            Element e = (Element) node;
+            sensorname_list.add(e.getAttribute("name"));
+        }
+        return sensorname_list;
+    }
 
     /**
      * sends command to a dumb device

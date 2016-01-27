@@ -3,9 +3,9 @@ package smarthome.examples.heating;
 import java.util.ArrayList;
 
 import message.Command;
-import smarthome.item.Controller;
-import smarthome.item.DumbDevice;
-import smarthome.item.Sensor;
+import smarthome.core.Controller;
+import smarthome.core.DumbDevice;
+import smarthome.core.Sensor;
 
 public class Thermostat implements Controller {
 

@@ -1,5 +1,5 @@
 <?xml version = "1.0" encoding ="UTF-8"?>
-<controller name = "garagedoor-controller">
+<controller name = "garagedoorcontroller">
     <command name= "open_garagedoor">
         <sensor name = "IS_GARAGE_OPEN" value = "false"/>
         <sensor name = "IS_CAR_INSIDE_GARAGE" value ="false"/>

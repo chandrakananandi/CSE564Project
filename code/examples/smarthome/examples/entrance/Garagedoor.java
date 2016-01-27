@@ -4,7 +4,7 @@ import channel.Channel;
 import message.Command;
 import port.InputPort;
 import port.OutputPort;
-import smarthome.item.DumbDevice;
+import smarthome.core.DumbDevice;
 import state.State;
 
 /**

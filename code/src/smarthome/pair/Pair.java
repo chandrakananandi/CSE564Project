@@ -1,11 +1,10 @@
 package smarthome.pair;
 
-import item.DumbDevice;
-import message.Command;
+import smarthome.core.DumbDevice;
 
 /**
  * represents a pair of elements, in this case a dumb device and the command issued to it by the controller
- * 
+ *
  * @author cnandi
  *
  */

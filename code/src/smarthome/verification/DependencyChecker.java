@@ -1,6 +1,6 @@
 package smarthome.verification;
 
-import smarthome.item.Item;
+import smarthome.core.Item;
 
 public class DependencyChecker {
     public static boolean verify_dependency_policy(Item item) {

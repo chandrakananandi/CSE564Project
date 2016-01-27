@@ -1,4 +1,4 @@
-package smarthome.item;
+package smarthome.core;
 
 public interface Item {
 

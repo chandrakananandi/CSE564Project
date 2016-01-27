@@ -4,7 +4,7 @@ import channel.Channel;
 import message.Command;
 import port.InputPort;
 import port.OutputPort;
-import smarthome.item.Controller;
+import smarthome.core.Controller;
 
 public class GaragedoorController extends Controller {
 

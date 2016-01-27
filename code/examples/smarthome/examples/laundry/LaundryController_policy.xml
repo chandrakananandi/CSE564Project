@@ -1,5 +1,5 @@
 <?xml version = "1.0" encoding ="UTF-8"?>
-<controller name ="laundrymachine-controller">
+<controller name ="laundrymachinecontroller">
     <command name = "start_washer">
         <sensor name = "IS_DOOR_CLOSED" value ="true"/>
         <sensor name = "IS_EMPTY" value = "false"/>

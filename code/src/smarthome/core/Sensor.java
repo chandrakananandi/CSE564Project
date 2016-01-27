@@ -1,6 +1,4 @@
-package smarthome.item;
-
-import item.Item;
+package smarthome.core;
 
 public abstract class Sensor implements Item {
 
@@ -9,6 +7,7 @@ public abstract class Sensor implements Item {
      *
      * @return
      */
+    @Override
     public abstract String getID();
 
     /**
