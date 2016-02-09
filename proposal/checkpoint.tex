@@ -4,7 +4,7 @@
 \usepackage{graphicx}
 \begin{document}
 \begin{center}
-\large \textbf{Progress Report}\\
+\large \textbf{CSE 564: Project Progress Report}\\
 \normalsize {Jeanette Daum (jdaum), Chandrakana Nandi (cnandi) }
 \end{center}
 \section{Initial plan}
@@ -46,6 +46,6 @@ if (new\_device.type = controller) \{ \\ \hspace*{1cm} verify\_dependency\_polic
 \section{Future plans and revision of milestones}
 We had planned to have the algorithms for verifying all three policies by the checkpoint but we are still trying to do so for the dependency and control policies. While the dynamic checking has been implemented already, we are looking for the best way to approach the static verification problem. Thus, our plan for the next few weeks is to focus on the verification part of the project. We did not expected it to be as complex as it seems right now. We plan to look at existing techniques such as using the Java Path Finder, or generating the Abstract Syntax Tree of the code and analysing it, or doing a data flow analysis. The reason why this part of the project is hard is because almost none of the existing program analysis tools can be used off the shelf. They need to be manually configured to handle specific problems in a project. 
 
-We might need to revise our initial milestones because even verifying one of the three policies will be very time consuming.  Thus, our new goal is to try to implement the verification tools for atleast one of the above three policies and show them working for atleast one case study. After that, if we still have time, we will show them working for more case studies and also implement the tools for verifying the other two policies.
+We might need to revise our initial milestones because even verifying one of the three policies will be very time consuming.  Thus, our new goal is to try to implement the verification tools for atleast one of the above three policies and show them working for atleast one case study. After that, if we still have time, we will show it working for more case studies and also implement the tools for verifying the other two policies.
 
 \end{document}
