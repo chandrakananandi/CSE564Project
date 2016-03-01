@@ -184,13 +184,9 @@ $}
 \subsection{Control policy}
 \label{subsec:control}
 We use the terms ``legal" and ``illegal" to refer to dumb devices which may and may not be controlled by a controller respectively and ``executable" and ``non-executable" to refer to commands that can and cannot be executed by a dumb device respectively. The only correct scenario is when a controller sends an ``executable" command to a ``legal" dumb device. 
-The control policy ensures that any other scenarios does not happen. According to the specification of a controller defined by a \textit{major organization}, every controller $k$ has a list of $n > 0$ commands it can send: $ C = \{c_1, c_2, ..., c_n\}$. $k$ also maintains a list of $m \geq 0$ ``legal" dumb devices (this would be implemented by a device discovery mechanism) and for every dumb device $d_i$,  a set of $l_i > 0$ commands it may send to them. Let this list be represented as: \\ $D_{m}= \{(d_{1}, c_{11}), ..., (d_{1}, c_{1l_1}), (d_{2}, c_{21}), ..., (d_{2}, c_{2l_2}), ..., (d_{m}, c_{m1}), ..., (d_m, c_{ml_m})\}$. 
-
-%\noindent Every dumb device, $d_{i} \in D_{m}$ has a set of $n_i \geq 0$ actions it can execute: $A_{n_{i}}=\{a_{i1}, a_{i2}, ... a_{i{n_{i}}}\}$. 
-\noindent The control policy states that:\\
-\noindent $\forall~\mathit{\texttt{action\_dumbdevice}}$ sent by $k$, 
-$(\exists~ c_i \in C~|~\texttt{action\_dumbdevice} = c_i)~\wedge~$
-$ (\exists~ j \in \{1, 2, ..., m\}~|~ \mathit{\texttt{dumbdevice} = d_j)}~\wedge$\\$(\texttt{action} \in \{c_{j1}, c_{j2}, ..., c_{jl_j}\})$
+The control policy ensures that any other scenarios does not happen. According to the specification of a controller defined by a \textit{major organization}, every controller $k$ has a list of $n > 0$ commands it can send: $ C = \{c_1, c_2, ..., c_n\}$. $k$ also maintains a list of $m \geq 0$ ``legal" dumb devices (this would be implemented by a device discovery mechanism) and for every dumb device $d_i$,  a set of $l_i > 0$ commands it may send to them. Let this list be represented as: \\ $D_{m}= \{(d_{1}, c_{11}), ..., (d_{1}, c_{1l_1}), (d_{2}, c_{21}), ..., (d_{2}, c_{2l_2}), ..., (d_{m}, c_{m1}), ..., (d_m, c_{ml_m})\}$. The control policy states that: $\forall~\mathit{\texttt{action\_dumbdevice}}$ sent by $k$, 
+$(\exists~ c_i \in C~|~\texttt{action\_dumbdevice} = c_i) \\ \wedge~$
+$ (\exists~ j \in \{1, 2, ..., m\}~|~ \mathit{\texttt{dumbdevice} = d_j)}~\wedge~(\texttt{action} \in \{c_{j1}, c_{j2}, ..., c_{jl_j}\})$
 
 
 \subsection{Information flow policy}
@@ -221,11 +217,14 @@ To explain the analysis, we first give a brief description of how we implemented
 We verify the following three properties using static analysis:
 \begin{enumerate}[topsep=0pt,itemsep=-1ex,partopsep=1ex,parsep=1ex]
     \item A command is sent only within an \texttt{update()} method, i.e. \\
-    \texttt{checkExecutabilityAndSend(new Command("action\_dumbdevice"))} is always invoked inside the \texttt{update()} method.
-    \item A command is sent only after checking certain conditions inside an \texttt{if-statement}.
-    \item A conditions checked in the \texttt{if-statement} are correct according to the policy file of the respective controller.
+    \texttt{checkExecutabilityAndSend(new Command("action\_dumbdevice"))} is always invoked inside the \texttt{update()} method. This is verified by checking that the latter is the node enclosing the former.
+    \item A command is sent only after checking certain conditions inside an \texttt{if-statement}. Similar to the above, this is verified by checking that \texttt{checkExecutabilityAndSend(new Command("action\_dumbdevice"))} is enclosed by an \texttt{if} node.
+    \item The clauses in the \texttt{if-statement} are correct according to the policy file of the respective controller. We implemented a dataflow analysis to verify this. Section~\ref{sec:impl} describes this in detail.\\
 \end{enumerate}
-To further elaborate items 2 and 3 above, let us consider the example of the smart laundry system. Figure~\ref{fig:policy} shows the dependency policies for the laundry machine controller as defined by a \textit{major organization}, represented in xml format. 
+
+To further elaborate the analysis, let us consider the example of the smart laundry system. Figure~\ref{fig:policy} shows the dependency policies for the laundry machine controller as defined by a \textit{major organization}, represented in xml format and figure~\ref{fig:code} shows an implementation of the \texttt{update()} method for the laundry machine controller. More than one parameter can be measured by a single sensor. To encode this feature there is a \texttt{class} attribute in the xml file which refers to an instance of a particular sensor.\\
+
+Consider the controller code to be implemented by a \textit{third-party device manufacturer} and given to the \textit{major organization} for integrating to their smart home platform. The latter will first verify the implementation against the specification shown in figure~\ref{fig:policy} and if it is successful, will mark the controller as ``authentic" and allow it to be integrated with the platform.\\
 
 \begin{figure}[h]
 \begin{center}
@@ -234,14 +233,17 @@ To further elaborate items 2 and 3 above, let us consider the example of the sma
 \label{fig:policy}
 \end{center}
 \end{figure}
+
 \begin{figure}[h]
 \begin{center}
 \includegraphics[scale=0.7, trim = 0 21.5cm 0 2cm]{code.pdf}
-\caption{\texttt{Update()} for the laundry machine controller.}
+\caption{\texttt{Update()} for the laundry machine controller. This is a correct implementation which is successfully verified against the policy.}
 \label{fig:code}
 \end{center}
 \end{figure}
+
 \section{Implementation}
+\label{sec:impl}
 The implementation has two parts: 
 \begin{itemize}
 \item A simulation of the smart home architecture described in section~\S\ref{sec:archi} together with three smart systems that can be executed on top of it. Table~\ref{table:appliance_sensor} provides a summary of the three smart systems. 
@@ -270,12 +272,20 @@ controller & commands & sensors & \#dependency \newline policies \\ \hline
 \end{table*}
 \item A static analyser that verifies whether the controllers in a smart system comply with their security policy specifications.
 \end{itemize}   
-In this project, we first play the role of a \textit{major organization} and develop the APIs, formalize the specification language, and implement the verification tools. Then we play the role of the \textit{third-party device manufacturers} and develop three smart systems using the APIs. Finally, we again play the role of the \textit{major organization} and verify  the code of the controllers developed by the third parties.
+From the implementation point of view, we first play the role of a \textit{major organization} and develop the APIs, formalize the specification language, and implement the verification tools. Then we play the role of the \textit{third-party device manufacturers} and develop three smart systems using the APIs. Finally, we again play the role of the \textit{major organization} and verify  the code of the controllers developed by the third parties.
 
-The entire implementation is done in java. The smart home architecture together with the benchmarks (the three smart systems) has approx. 1300 LOC\footref{note1} and the static analyser has approx. 300 LOC. To simulate the sensors measuring different parameters and updating the corresponding sensor variables, we use pseudorandom number generators in appropriate ranges. 
+The entire implementation is done in java. The smart home architecture together with the benchmarks (the three smart systems) has approx. 1300 LOC\footref{note1} and the static analyser has approx. 300 LOC\footnote{link to the code repository is soon to come}. To simulate the sensors measuring different parameters and updating the corresponding sensor variables, we use pseudorandom number generators in appropriate ranges. \\
 
 
-We implemented our static analysis tool as a checker on top of Google's error-prone framework~\cite{errorprone}. Error prone is a static analyser for Java and provides an API which can be used to develop different types of program analysis tools. As a part of the static analysis, we also developed a dataflow analysis for verifying the third item mentioned in section~\S\ref{sec:analysis}. The dataflow analyser parses the conditions checked in the \texttt{if-statement} and the statements inside its body to find the command being sent, searches for the policy file (represented in xml format) of the controller, compares the conditions to the policies (sensor values or range of values) in that file, and verifies that the conditions match with those in the policy file for the command being sent inside the body. 
+We implemented our static analysis tool as a checker on top of Google's error-prone framework~\cite{errorprone}. Error prone is a static analyser for Java and provides an API which can be used to develop different types of program analysis tools. As a part of the static analysis, we also developed a dataflow analysis for verifying the third item mentioned in section~\S\ref{sec:analysis}. The dataflow analyser parses the conditions checked in the \texttt{if-statement} and the statements inside its body to find the command being sent, searches for the policy file (represented in xml format) of the controller, compares the conditions to the policies (sensor values or range of values) in that file, and verifies that the conditions match with those in the policy file for the command being sent inside the body. Figure~\ref{fig:verify1} shows a snippet of the verification code. The verification of the clauses in the \texttt{if-statement} is done inside the \texttt{SEND\_ENCLOSEDBY\_IF} matcher.
+\begin{figure}[h]
+\begin{center}
+\includegraphics[scale=0.7, trim = 0 22cm 0 2cm]{verify1.pdf}
+\caption{Code snippet showing the verification algorithm}
+\label{fig:verify1}
+\end{center}
+\end{figure}
+
 
 \section{Results}
 
