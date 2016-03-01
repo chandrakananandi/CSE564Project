@@ -140,7 +140,8 @@ We formally define three types of security policies that should be satisfied by 
 
 \item Information flow policy (\S\ref{subsec:information}): This policy ensures that sensitive information from within a smart home is not leaked or sent to the cloud without user permissions or proper anonymization. 
 \end{itemize}
-There are many other policies which are interesting for a smart home such as \textit{temporal policies} which ensures that the events happening in a smart home respect certain timing constraints and \textit{new device policy} which ensures that when a new device is added to a house, it should not cause the home to violate any of the other policies assuming that they were satisfied before the integration of the new device.
+There are many other policies which are interesting for a smart home such as \textit{temporal policies} which ensures that the events happening in a smart home respect certain timing constraints and \textit{new device policy} which ensures that when a new device is added to a smart home, it should not cause violation any of the other policies assuming that they were satisfied before the integration of the new device.
+
 All the above policies are important when it comes to ensuring the security of a smart home. However, in the interest of time, we are focusing our verification only on the \textit{Dependency policy} because as explained in section~\S\ref{sec:threat}, serious security breaches can occur when this policy is violated. 
 
 
@@ -204,6 +205,32 @@ To summarize, \vspace{-10pt}
 \item $d.\mathit{type}= \mathit{non\_sensitive} \Rightarrow  d.\mathit{destination} \in L_d$ 
 \end{itemize}
 
+\section{Case studies}
+\label{benchmarks}
+We developed a simulation of a smart home architecture and three smart systems that can be run on top of the architecture. Table~\ref{table:appliance_sensor} provides a summary of the three smart systems. 
+
+\begin{table*}[h]
+\begin{center}
+\begin{tabular}{|p{4cm}|p{6cm}|p{4.5cm}|}
+\hline
+controller & commands & sensors \\ \hline
+\tiny{GARAGE\_DOOR\_CONTROLLER} \tiny{(for dumb: device garage door)} & 
+\small{open\_garagedoor, close\_garagedoor}\tiny &  
+\tiny{IS\_GARAGE\_OPEN, \newline IS\_CAR\_INSIDE\_GARAGE, \newline IS\_CAR\_RUNNING, \newline IS\_OWNER\_INSIDE\_CAR,\newline CAR\_DISTANCE (double), \newline CAR\_SPEED (double)} \\ \hline
+
+\tiny{LAUNDRY\_MACHINE\_CONTROLLER} \tiny{ (for dumb: device laundry machine)} &
+\small start\_washer, \small stop\_washer & 
+\tiny{IS\_WASHER\_ON}, \newline \tiny{IS\_EMPTY, \newline IS\_DOOR\_CLOSED, \newline IS\_CLEANED} \\ \hline
+
+\tiny{THERMOSTAT} \tiny{(for dumb devices: room heater and air conditioner)} & 
+\small start\_roomheater,\newline \small stop\_roomheater,\newline\small start\_airconditioner, \newline \small stop\_airconditioner & 
+\tiny{IS\_ROOMHEATER\_ON}, \tiny{IS\_AIRCONDITIONER\_ON},
+\tiny{IS\_HOUSE\_EMPTY, \newline IS\_WINDOW\_OPEN, \newline IS\_DOOR\_OPEN, IS\_TEMP\_BELOW\_LOWERTHRESHOLD, IS\_TEMP\_ABOVE\_UPPERTHRESHOLD}, \tiny{OWNER\_DISTANCE (double)}\\ \hline
+\end{tabular}
+\caption{\small{An example smart home with three smart systems. Each sensor variable has type boolean unless otherwise indicated in parentheses.}}
+\label{table:appliance_sensor}
+\end{center}
+\end{table*}
 
 \section{Static Analysis}
 \label{sec:analysis}
@@ -211,8 +238,8 @@ Static analysis is a way to provide compile time guarantees that the code does n
 
 \begin{figure}[htpb]
 \begin{center}
-\includegraphics[scale=0.4, trim = 0 0 0 0]{results_update.png}
-\caption{Execution times of the laundry machine controller with (PolicyEnforcedUpdate) and without(Update) dynamic policy enforcement.}
+\includegraphics[scale=0.35, trim = 0 0 0 0]{results_update.png}
+\caption{Execution times of the laundry machine controller with (PolicyEnforcedUpdate) and without(Update) dynamic policy enforcement over 100 simulations.}
 \label{fig:dynamic}
 \end{center}
 \end{figure}
@@ -224,32 +251,9 @@ We verify the following three properties using static analysis:
 \end{enumerate}
 
 \section{Implementation}
-The implementation has two parts: a prototype of the smart home architecture described in section~\S\ref{sec:archi} together with three smart systems based on it, and a static analyser that verifies whether the controllers in a smart system comply with their security policy specifications. The entire implementation is done in java. The smart home architecture implementation has approx. 1300 LOC\footnote{The code is here: https://gitlab.cs.washington.edu/cnandi/my-stuff} and the static analyser has approx. 300 LOC. Table~\ref{table:appliance_sensor} provides a summary of the three smart systems we implemented for benchmarking. The policies are specified in xml format. \\
+The implementation has two parts: a simulation of the smart home architecture described in section~\S\ref{sec:archi} together with three smart systems based on it, and a static analyser that verifies whether the controllers in a smart system comply with their security policy specifications. The entire implementation is done in java. The smart home architecture together with the benchmarks (the three smart systems) has approx. 1300 LOC\footnote{The code is here: https://gitlab.cs.washington.edu/cnandi/my-stuff} and the static analyser has approx. 300 LOC. . 
  
 For the static analysis tool, we built a checker on top of Google's error-prone framework~\cite{errorprone}. Error prone is a static analyser for Java and provides an API which can be used to develop different types of program analysis tools. As a part of the static analysis, we also developed a dataflow analysis for verifying the third item mentioned in section~\S\ref{sec:analysis}. The dataflow analyser parses the conditions inside the \texttt{if-statement} and its body, and compares them to the policies of the respective controller in the xml file and verifies if they are the correct conditions for the command being sent inside the body of the \texttt{if-statement}. 
-
-\begin{table*}[h]
-\begin{center}
-\begin{tabular}{|p{4cm}|p{6cm}|p{4.5cm}|}
-\hline
-controller & commands & sensors \\ \hline
-\tiny{GARAGE\_DOOR\_CONTROLLER} & 
-\small{open\_garagedoor, close\_garagedoor}\tiny &  
-\tiny{IS\_GARAGE\_OPEN, \newline IS\_CAR\_INSIDE\_GARAGE, \newline IS\_CAR\_RUNNING, \newline IS\_OWNER\_INSIDE\_CAR,\newline CAR\_DISTANCE (double), \newline CAR\_SPEED (double)} \\ \hline
-
-\tiny{LAUNDRY\_MACHINE\_CONTROLLER} &
-\small start\_washer, \small stop\_washer & 
-\tiny{IS\_WASHER\_ON}, \newline \tiny{IS\_EMPTY, \newline IS\_DOOR\_CLOSED, \newline IS\_CLEANED} \\ \hline
-
-\tiny{THERMOSTAT} & 
-\small start\_roomheater,\newline \small stop\_roomheater,\newline\small start\_airconditioner, \newline \small stop\_airconditioner & 
-\tiny{IS\_ROOMHEATER\_ON}, \tiny{IS\_AIRCONDITIONER\_ON},
-\tiny{IS\_HOUSE\_EMPTY, \newline IS\_WINDOW\_OPEN, \newline IS\_DOOR\_OPEN, IS\_TEMP\_BELOW\_LOWERTHRESHOLD, IS\_TEMP\_ABOVE\_UPPERTHRESHOLD}, \tiny{OWNER\_DISTANCE (double)}\\ \hline
-\end{tabular}
-\caption{\small{An example smart home with three smart systems. Each sensor variable has type boolean unless otherwise indicated in parentheses.}}
-\label{table:appliance_sensor}
-\end{center}
-\end{table*}
 
 \section{Results}
 
