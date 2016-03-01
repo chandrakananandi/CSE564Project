@@ -80,18 +80,18 @@ In our high-level architecture, we abstract away the lower level details of a sm
 
 \subsection{Roles of different organizations}
 \label{subsec:roles}
-We consider the entire smart home business to comprise of four different groups playing different roles. We propose a hierarchical authentication mechanism to ensure that smart homes satisfy certain security and correctness standards. The  mechanism is hierarchical so that it can scale to a very large number of manufacturers who are interested in developing smart devices.   
+We consider the entire smart home business to comprise of four different groups playing different roles. We propose a hierarchical certification mechanism to ensure that smart homes satisfy certain security and correctness standards. The  mechanism is hierarchical so that it can scale to a very large number of manufacturers who are interested in developing smart devices.   
 \begin{itemize}[topsep=0pt,itemsep=0ex,partopsep=1ex,parsep=1ex]
 \item \textit{Standard organizations}: Similar to standards like IEEE and IEC, we propose organizations to be developed for specifying certain standards for smart homes. The organizations would define security, privacy and correctness specifications which should ideally be met by all smart devices. An example specification related to information flow could be that information from within the smart home should not be sent to the cloud without user permission. Another example of a specification related to access control could be that the controller of a certain category of devices may not control devices which do not fall in that category (a garage door and a coffee maker would not be in the same category). Yet another example of a specification related to sensor dependency could be that a controller may send a command only under certain sensor conditions.
 \item \textit{Major organizations}: We define major organizations as companies such as Samsung~\cite{samsung}, Apple~\cite{homekit}, etc. who provide platforms (hubs or apps) for integrating different smart devices and communication protocols to make them interact with each other or allow the users to control them remotely. In our model, we consider these organizations to have their own methodology for specifying the standards defined by the \textit{standard organizations} and verifying devices against them. For example the methodology could be a domain specific language for specifying the policies and a type system for verifying them. 
-These organizations would be inspected by the \textit{standard organizations} and marked as ``authentic" if the \textit{standard organizations} find that their mechanisms for specifying and verifying the standards are acceptable.
+These organizations would be inspected by the \textit{standard organizations} and marked as ``certified" if the \textit{standard organizations} find that their mechanisms for specifying and verifying the standards are acceptable.
 
 
 \item \textit{Third-party device manufacturers}: They are the companies like Philips, Withings and numerous other small manufacturers who develop \textit{controllers}, \textit{dumb-devices} and \textit{sensors}~\cite{workswithsmartthings, workswithhomekit} which can be integrated to the platforms developed by the \textit{major organizations}. The latter themselves can also be device manufacturers; both Samsung and Apple manufacture their own smart devices. 
 The \textit{major organizations} would release APIs for implementing devices which can be used by third-party device manufacturers so that their products can be integrated to the platforms of the former.
-Before  allowing any device manufactured by a third party to be integrated to their platform, the major organizations must verify the code against the specifications. The devices that pass the verification would be marked as ``authentic" and may be trusted. 
+Before  allowing any device manufactured by a third party to be integrated to their platform, the major organizations must verify the code against the specifications. The devices that pass the verification would be marked as ``certified" and may be trusted. 
 
-\item \textit{End users}: They are the home inhabitants who own (or want to own) a smart home. An end user might want to buy a hub (or app) from one of the existing \textit{major organizations} to plug in different smart devices bought either from the \textit{major organizations} or from some \textit{third-party device manufacturer} and convert their ordinary home to a smart home. As long as the devices are marked as ``authentic" by one of the \textit{major organizations}, the end user can trust them due to the hierarchical authentication mechanism.
+\item \textit{End users}: They are the home inhabitants who own (or want to own) a smart home. An end user might want to buy a hub (or app) from one of the existing \textit{major organizations} to plug in different smart devices bought either from the \textit{major organizations} or from some \textit{third-party device manufacturer} and convert their ordinary home to a smart home. As long as the devices are marked as ``certified" by one of the \textit{major organizations}, the end user can trust them due to the hierarchical certification mechanism.
 \end{itemize}
 
 
@@ -120,7 +120,7 @@ Our threat model is a third-party device manufacturer, $X$, developing \textit{c
 In other words, we do not trust a controller developed by a third-party device manufacturer. 
 
 The trusted components are the \textit{standard organizations} and the \textit{major organizations}. As a result, we also consider the standards set by the former, and the specifications and the verification tools (and devices) developed by the latter to be trusted components.
-Only if a device manufactured by a \textit{third-party device manufacturer} is marked as ``authentic" by a \textit{major organization} after verifying its implementation against the specifications, can it be trusted by an end user. 
+Only if a device manufactured by a \textit{third-party device manufacturer} is marked as ``certified" by a \textit{major organization} after verifying its implementation against the specifications, can it be trusted by an end user. 
 The \textit{end users} who own the smart homes are themselves trusted to not attack their own homes for any reason. 
 
 The specification and verification of policies is done by the \textit{major organizations} and the development of the devices is done either by the \textit{major organizations} or \textit{third-party device manufacturers}. All the four groups described in section~\S\ref{subsec:roles} are stakeholders in this model. The \textit{end users} because they are directly affected by any security loophole and the other three organizations because their business will fail if they lose the trust of the \textit{end users}.
@@ -138,7 +138,7 @@ We formally define three types of security policies that should be satisfied by 
 \begin{itemize}
 \item Dependency policy (\S\ref{subsec:dep}): This policy states the  conditions (sensor values) under which a controller is allowed to send a command.
 
-\item Control policy (\S\ref{subsec:control}): This policy states that a controller should only send correct commands to correct dumb devices. For example, the bedroom light controller should not control the lights in the living room.
+\item Control policy (\S\ref{subsec:control}): This policy states that a controller should only send correct commands to correct dumb devices. For example, the coffee maker's controller should not control the lights in the living room.
 
 \item Information flow policy (\S\ref{subsec:information}): This policy ensures that sensitive information from within a smart home is not leaked to the outside world without user permissions or proper anonymization. 
 \end{itemize}
@@ -184,7 +184,7 @@ $}
 \subsection{Control policy}
 \label{subsec:control}
 We use the terms ``legal" and ``illegal" to refer to dumb devices which may and may not be controlled by a controller respectively and ``executable" and ``non-executable" to refer to commands that can and cannot be executed by a dumb device respectively. The only correct scenario is when a controller sends an ``executable" command to a ``legal" dumb device. 
-The control policy ensures that any other scenarios does not happen. According to the specification of a controller defined by a \textit{major organization}, every controller $k$ has a list of $n > 0$ commands it can send: $ C = \{c_1, c_2, ..., c_n\}$. $k$ also maintains a list of $m \geq 0$ ``legal" dumb devices (this would be implemented by a device discovery mechanism) and for every dumb device $d_i$,  a set of $l_i > 0$ commands it may send to them. Let this list be represented as: \\ $D_{m}= \{(d_{1}, c_{11}), ..., (d_{1}, c_{1l_1}), (d_{2}, c_{21}), ..., (d_{2}, c_{2l_2}), ..., (d_{m}, c_{m1}), ..., (d_m, c_{ml_m})\}$. The control policy states that: $\forall~\mathit{\texttt{action\_dumbdevice}}$ sent by $k$, 
+The control policy ensures that no other scenario happens. According to the specification of a controller defined by a \textit{major organization}, every controller $k$ has a list of $n > 0$ commands it can send: $ C = \{c_1, c_2, ..., c_n\}$. $k$ also maintains a list of $m \geq 0$ ``legal" dumb devices (this would be implemented by a device discovery mechanism) and for every dumb device $d_i$,  a set of $l_i > 0$ commands it may send to them. Let this list be represented as: \\ $D_{m}= \{(d_{1}, c_{11}), ..., (d_{1}, c_{1l_1}), (d_{2}, c_{21}), ..., (d_{2}, c_{2l_2}), ..., (d_{m}, c_{m1}), ..., (d_m, c_{ml_m})\}$. The control policy states that: $\forall~\mathit{\texttt{action\_dumbdevice}}$ sent by $k$, 
 $(\exists~ c_i \in C~|~\texttt{action\_dumbdevice} = c_i) \\ \wedge~$
 $ (\exists~ j \in \{1, 2, ..., m\}~|~ \mathit{\texttt{dumbdevice} = d_j)}~\wedge~(\texttt{action} \in \{c_{j1}, c_{j2}, ..., c_{jl_j}\})$
 
@@ -192,7 +192,7 @@ $ (\exists~ j \in \{1, 2, ..., m\}~|~ \mathit{\texttt{dumbdevice} = d_j)}~\wedge
 \subsection{Information flow policy}
 \label{subsec:information}
 This policy ensures that sensitive information from a smart home is not leaked to the outside world without user's permission or proper anonymization.
-This policy can be verified using a type system similar to \cite{ernst}. If $d$ is some data that an device gathers from a smart home, it is annotated as \texttt{sensitive} or \texttt{non\_sensitive}. 
+This policy can be verified using a type system similar to \cite{ernst}. If $d$ is a data that a device gathers from a smart home, it is annotated as \texttt{sensitive} or \texttt{non\_sensitive}. 
 Let $L_d$ denote a list of all the destinations to which $d$ may be sent. Then the policy states that: if $d$ is not sensitive, then it may be sent to any of the allowed destinations. If it is sensitive, then before sending it anywhere, it should pass through the user's scrutiny. The user may either decide not to send it anywhere or to anonymize it before sending it to some destinations that seem fit. This is represented using an ordered pair, the first element of which describes the action to be performed, and the second element is a list of destinations allowed. The ordered pairs can be of two types, \vspace{-7pt}
 \begin{itemize}
 \itemsep0em 
@@ -202,7 +202,7 @@ Let $L_d$ denote a list of all the destinations to which $d$ may be sent. Then t
 
 \section{Static Analysis}
 \label{sec:analysis}
-Static analysis is a way to provide compile time guarantees that the code does not violate correctness and security specifications. Static techniques have certain advantages over dynamic techniques (like testing or dynamic policy enforcement) such as it does not rely on the quality of the test suite and does not require the code to be executed. In case of safety critical applications, static analysis is better than dynamic analysis because approaches like testing may not capture all possible corner cases and may fail to detect certain bugs thereby having severe consequences while dynamic enforcement of policies may add unnecessary overhead thereby making the system unreliable. We performed a preliminary experiment with the automatic laundry system and found that the execution times were much higher with dynamic policy enforcement and hence decided to develop a static analyzer for the smart home. Figure~\ref{fig:dynamic} shows the execution times for the laundry system. 
+Static analysis is a way to provide compile time guarantees that the code does not violate correctness and security specifications. Static techniques have certain advantages over dynamic techniques (like testing or dynamic policy enforcement) such as it does not rely on the quality of a test suite and does not require the code to be executed. In case of safety critical applications, static analysis is better than dynamic analysis because approaches like testing may not capture all possible corner cases and may fail to detect certain bugs thereby having severe consequences while dynamic enforcement of policies may add unnecessary overhead thereby making the system unreliable. We performed a preliminary experiment with the automatic laundry system and found that the execution times were much higher with dynamic policy enforcement and hence decided to develop a static analyzer for the smart home. Figure~\ref{fig:dynamic} shows the execution times for the laundry system. 
 
 \begin{figure}[htpb]
 \begin{center}
@@ -224,7 +224,7 @@ We verify the following three properties using static analysis:
 
 To further elaborate the analysis, let us consider the example of the smart laundry system. Figure~\ref{fig:policy} shows the dependency policies for the laundry machine controller as defined by a \textit{major organization}, represented in xml format and figure~\ref{fig:code} shows an implementation of the \texttt{update()} method for the laundry machine controller. More than one parameter can be measured by a single sensor. To encode this feature there is a \texttt{class} attribute in the xml file which refers to an instance of a particular sensor.\\
 
-Consider the controller code to be implemented by a \textit{third-party device manufacturer} and given to the \textit{major organization} for integrating to their smart home platform. The latter will first verify the implementation against the specification shown in figure~\ref{fig:policy} and if it is successful, will mark the controller as ``authentic" and allow it to be integrated with the platform.\\
+Consider the controller code to be implemented by a \textit{third-party device manufacturer} and given to the \textit{major organization} for integrating to their smart home platform. The latter will first verify the implementation against the specification shown in figure~\ref{fig:policy} and if it is successful, will mark the controller as ``certified" and allow it to be integrated with the platform.\\
 
 \begin{figure}[h]
 \begin{center}
@@ -292,7 +292,9 @@ We implemented our static analysis tool as a checker on top of Google's error-pr
 \section{Conclusions and future work}
 In this project, we designed and implemented a simulation of a smart home and developed a static analyser for verifying that the smart systems in the smart home satisfy certain security and correctness policies. We also analysed the various stakeholders in the smart home business and assigned roles to different organizations such that the home owners can have a guarantee that their smart homes are secure. 
 
-In this work, we focused only on verifying the dependency policies for smart homes. As mentioned in section~\S\ref{sec:policies}, there are various other security and correctness policies that are important for a smart home. As a part of the future work, we plan to verify those other policies and also relax our assumption that the dumb-devices and sensors are trusted. We would also like to extend our prototype to integrate it with some real devices and do an extensive evaluation.
+We focused only on specifying and verifying the dependency policies for smart homes. As mentioned in section~\S\ref{sec:policies}, there are various other security and correctness policies that are important. As a part of the future work, we plan to verify those other policies and also relax our assumption that the dumb-devices and sensors are trusted. We would also like to extend our prototype to integrate it with some real devices and do an extensive evaluation.
+\section{Acknowledgements}
+We would like to thank Mike Ernst for his valuable feedback on the ideas and the implementation, and Suzanne Millstein and Konstantin Weitz for their help in figuring out the right tools for doing the verification.
 \bibliographystyle{abbrv}
 \bibliography{citations}
 \end{document}
