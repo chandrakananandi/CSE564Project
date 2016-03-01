@@ -1,12 +1,11 @@
 \documentclass{article}
+\usepackage[english]{babel}
 \usepackage{fullpage}
 \usepackage{graphicx}
 \usepackage{enumitem}
+\usepackage{url}
 \usepackage[usenames, dvipsnames]{color}
 \usepackage[utf8]{inputenc}
-
-
-
 \title{\textbf{CSE 564 Project Report} 
 \\
 \begin{center}
@@ -23,18 +22,19 @@ One of the applications of Internet of Things which is gaining popularity is Hom
 
 \end{abstract}
 \section{Introduction}
-Home automation systems are a new trend that is just starting to gain momentum, and will soon have a huge impact on our everyday lives~\cite{samsung, homekit, echo, wink, homeos}. Typically, these systems consist of devices interacting with each other. These devices can take actions autonomously or they can be controlled remotely by the home inhabitants. An example is a garage door that opens automatically whenever the car is within a certain distance, but also opens and closes when the user gives a remote command by pressing a button. 
+Home automation systems are a new trend that is just starting to gain momentum and will soon have a huge impact on our everyday lives~\cite{samsung, homekit, echo, wink, homeos}. Typically, these systems consist of devices interacting with each other. These devices can take actions autonomously or they can be controlled remotely by the home inhabitants. An example is a garage door that opens automatically whenever the car is within a certain distance, but also opens and closes when the user gives a remote command by pressing a button. 
 
-For our project, we consider a smart home to be a collection of interacting devices acting autonomously without requiring the user to intervene. Nowadays, most of the existing systems require user interaction and remote control but we expect future systems to become more autonomous to further assist its inhabitants.
+For our project, we consider a smart home to be a collection of interacting devices acting autonomously without requiring the user to intervene. Nowadays most of the existing systems require user interaction and remote control but we expect future systems to become more autonomous to further assist its inhabitants~\cite{homekit}.
 
-A challenge for smart homes is to ensure that there are no security loopholes because they can be exploited by malicious attackers to take control of the house and harm the inhabitants~\cite{yoshi, jung}. Before smart homes become as widespread as smart phones are today, it is necessary for the home automation industry to address these concerns. For autonomous systems, security and correctness is even more crucial because the user relies on the system and does not have much control on it. 
+A challenge for smart homes is to ensure that there are no security loopholes because they can be exploited by malicious attackers to take control of the house and harm the inhabitants~\cite{yoshi, jung}. Before smart homes become as widespread as smart phones are today, it is necessary for the home automation industry to address these concerns. For autonomous systems, security and correctness is even more crucial because the user relies on the system and may not have much control over it. 
 
-In this project, our goal is to ensure that a system of interacting smart devices satisfies a set of security properties. We are concerned with security at the device level and not with the security of the communication protocols or the underlying operating system. We aim to solve the problem of security for smart homes from the point of view of the manufacturers of the smart devices so that they can guarantees that their devices are secure and correct. 
+In this project, our goal is to ensure that a system of interacting smart devices satisfies a set of security properties. We are concerned with security at the device level and not with the security of the communication protocols or the underlying operating system. We aim to solve the problem of security for smart homes from the point of view of the manufacturers of the smart devices so that they can guarantees that their devices are secure and correct. Section~\ref{subsec:roles} describes the roles played by manufacturers of devices, users and major organizations (such as Samsung, Apple, etc.) in our model in detail.
 
-To this end, we represent a smart home as a collection of three types of devices: controllers, sensors and dumb-devices. The controllers send commands to the dumb-devices based on values of sensors which measure different parameters such as temperature, state of a dumb-devices etc. The dumb-devices simply execute the commands sent to them.
-We define a set of security policies that and specify them for three different smart systems: an automatic laundry system, an automatic garage door system and a thermostat. We developed a static analyzer that verifies that the three smart systems adhere to their respective policies. By conducting a preliminary experiment explained in section~\ref{sec:analysis}, we show that for smart homes, dynamically enforcing security policies can lead to a large overhead which may affect the reliability of the system. This motivates our decision of doing static program verification to provide compile time guarantees that a smart home is secure. Our main contributions are:
+We have modelled a smart home as a collection of three types of devices: controllers, sensors and dumb-devices. The controllers send commands to the dumb-devices based on values of sensors which measure different parameters such as temperature, state of a dumb-devices etc. The dumb-devices simply execute the commands sent to them.
+We defined a set of security policies and specified them for three different smart systems: an automatic laundry system, an automatic garage door system and a thermostat. We developed a static analyzer that verifies that the three smart systems adhere to their respective policies. By conducting a preliminary experiment explained in section~\ref{sec:analysis}, we show that for smart homes, dynamically enforcing security policies can lead to a large overhead which may affect the reliability of the system. This motivates our decision of doing static program verification to provide compile time guarantees that a smart home is secure. Our main contributions are:
 \begin{itemize}[topsep=0pt,itemsep=0ex,partopsep=1ex,parsep=1ex]
     \item Designing a smart home architecture, implementing a prototype of the architecture and three smart systems based on it.
+    \item Assigning roles to different organizations involved in the smart home business. 
     \item Defining and formalizing different types of security and correctness policies and specifying them for the three smart systems.
     \item Developing a static analysis tool for verifying the code of the smart systems.
 \end{itemize}
@@ -53,7 +53,7 @@ We present a high-level modular architecture for designing smart homes which cla
 
 \begin{figure}
 \begin{center}
-\includegraphics[scale=0.6, trim= 0 600 0 0]{figure1.pdf}
+\includegraphics[scale=0.4, trim= 0 600 0 0]{figure1.pdf}
 \caption{\color{RoyalBlue}{Sensors}, \color{Maroon}{controllers,} \color{black}{and} \color{LimeGreen}{dumb devices}. %\color{black}{The thermostat sends commands depending on values from two sensors: the thermometer and the location sensor. The door controller also sends commands depending on the values of two sensors: the location sensor and the current state of the door.}
 }
 \label{fig:arch}
@@ -61,18 +61,30 @@ We present a high-level modular architecture for designing smart homes which cla
 \end{figure}
 
 \subsection{Sensors, controllers and dumb devices}
+\label{subsec:devices}
+\textit{Sensors} measure properties like temperature, motion, state of a dumb device, etc. and notify controllers depending on them. Sensors can be inside or outside the house. Examples of sensors inside the house are: motion detectors, the thermostat etc. and outside the house are: a camera outside the main door or the GPS sensor in the owner's smart phone when the owner is outside. 
 
-Sensors measure properties like temperature, motion, state of a dumb device, etc. and notify controllers depending on them. Sensors can be inside or outside the house. Examples of sensors inside the house are: motion detectors, the thermostat etc. and outside the house are: a camera outside the main door or the GPS sensor in the owner's smart phone when the owner is outside. 
-
-Controllers send commands directly to some of the dumb devices depending on the values of one or more sensors. 
+\textit{Controllers} send commands directly to some of the dumb devices depending on the values of one or more sensors. 
 %They have a set of commands they can send and a set of \textit{dependency policies} which specify the conditions (sensor values) under which they can send a command to a dumb device. Both of these are the specifications against which a controller's implementation is verified. 
 
 %A dumb device %belongs to some category such as room-heater, air-conditioner, light-bulb, garage-door etc. and 
 %has a set of actions it can execute, such as on, off, open, close etc. 
-Dumb devices do not send messages to other dumb devices, sensors, or controllers. They atomically execute the commands sent to them by any controller. 
+\textit{Dumb devices} do not send messages to other dumb devices, sensors, or controllers. They atomically execute the commands sent to them by any controller. 
 
 It is not necessary for the sensors, controllers, and dumb devices to be physically separate from each other: 
 a controller may be fit to a dumb device or a dumb device may have sensors attached to it. For formal reasoning about the system, we treat them as separate entities. Figure~\ref{fig:arch} illustrates the architecture of a simple example smart system. 
+
+\subsection{Role of major organizations, users and device manufacturers}
+\label{subsec:roles}
+We consider the smart home market to comprise of three different groups playing different roles:
+\begin{itemize}[topsep=0pt,itemsep=0ex,partopsep=1ex,parsep=1ex]
+\item \textit{Major organizations}: We define major organizations as companies such as Samsung~\cite{samsung}, Apple~\cite{homekit}, etc. who provide platforms (hubs or apps) for integrating different smart devices and communication protocols to make them interact with each other. 
+\item \textit{End users}: They are the home inhabitants who own (or want to own) a smart home. An end user might want to buy a hub (or app) from one of the existing \textit{major organizations} to plug in different smart devices and convert their ordinary home to a smart home.
+
+\item \textit{Device manufacturers}: They are the companies such as Philips, Withings, etc. who develop \textit{controllers}, \textit{dumb-devices} and \textit{sensors}~\cite{workswithsmartthings, workswithhomekit} which can be integrated to the platforms developed by the \textit{major organizations}. The major organizations themselves can also be device manufacturers; both Samsung and Apple manufacture their own smart devices.
+\end{itemize}
+
+In our smart home model, we consider the major organizations to 
 
 %Verification of the policies we defined ensures that (a) a controller does not send commands to a dumb device it owns under the wrong conditions, (b) it only send correct commands to the correct dumb devices, and (c) adding a new device to the house does not violate any security or correctness policy. \\
 
@@ -208,8 +220,8 @@ Static analysis is a way to provide compile time guarantees that the code does n
 
 \begin{figure}[htpb]
 \begin{center}
-\includegraphics[scale=0.6, trim = 0 0 0 0]{results_update.png}
-\caption{Execution times of the laundry machine controller with and without dynamic policy enforcement.}
+\includegraphics[scale=0.4, trim = 0 0 0 0]{results_update.png}
+\caption{Execution times of the laundry machine controller with (PolicyEnforcedUpdate) and without(Update) dynamic policy enforcement.}
 \label{fig:dynamic}
 \end{center}
 \end{figure}
@@ -221,16 +233,8 @@ We verify the following three properties using static analysis:
 \end{enumerate}
 
 \section{Implementation}
-The implementation has two parts: a prototype of the smart home architecture described in section~\ref{sec:archi} and a static analysis tool that verifies whether the controllers in a smart system comply with their security policy specifications. The entire implementation is done in java. The smart home architecture implementation has approx. 1300 lines of code and the static analyser has approx. 300 lines of code. Figure~\ref{fig:classdia} shows the class diagram for the implementation of the architecture\footnote{The code is here: https://gitlab.cs.washington.edu/cnandi/my-stuff}. 
+The implementation has two parts: a prototype of the smart home architecture described in section~\ref{sec:archi} and a static analysis tool that verifies whether the controllers in a smart system comply with their security policy specifications. The entire implementation is done in java. The smart home architecture implementation has approx. 1300 LOC\footnote{The code is here: https://gitlab.cs.washington.edu/cnandi/my-stuff} and the static analyser has approx. 300 LOC.  
 For the static analysis tool, we built a checker on top of Google's error-prone framework~\cite{errorprone}. Error prone is a static analysis tool for Java and provides an API which can be used to develop different types of program analysis tools. As a part of the static analysis, we also developed a dataflow analysis for verifying the third item mentioned in section~\ref{sec:analysis}. The dataflow analyser parses the conditions inside the \texttt{if-statement} and its body, and compares them to the policies of the respective controller in the xml file and verifies if they are the correct conditions for the command being sent inside the body of the \texttt{if-statement}. 
-
-\begin{figure}[htpb]
-\begin{center}
-\includegraphics[scale=0.7, trim ={1cm 0 0 7.7cm}]{class-diagram.pdf}
-\caption{Class diagram of the home automation system implementation}
-\label{fig:classdia}
-\end{center}
-\end{figure}
 
 \section{Results}
 
