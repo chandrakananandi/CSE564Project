@@ -6,6 +6,8 @@
 \usepackage{url}
 \usepackage[usenames, dvipsnames]{color}
 \usepackage[utf8]{inputenc}
+\usepackage{footmisc}
+
 \title{\textbf{CSE 564 Project Report (Draft)} 
 \\
 \begin{center}
@@ -123,13 +125,7 @@ The \textit{end users} who own the smart homes are themselves trusted to not att
 
 The specification and verification of policies is done by the \textit{major organizations} and the development of the devices is done either by the \textit{major organizations} or \textit{third-party device manufacturers}. All the four groups described in section~\S\ref{subsec:roles} are stakeholders in this model. The \textit{end users} because they are directly affected by any security loophole and the other three organizations because their business will fail if they lose the trust of the \textit{end users}.
 
- To further scope our research for this project, we assume that the sensors and dumb-devices are not compromised and that the former always store the latest values of the properties they measure. We also assume that the dumb devices trust the commands they receive from the controllers and atomically execute them. Additionally, we consider the communication protocol to be trusted and do not focus on man-in-the-middle attacks. \\
- 
- As we explained in section~\ref{subsec:roles}, the verification is done by the \textit{major organizations}. They release APIs which are used by the third-party manufacturers to develop different types of devices so that they can be integrated to the platform of the major organizations. 
-
-In this project, we first play the role of a \textit{major organization} and develop the APIs, formalize the specification language, and implement the verification tools. Then we play the role of the \textit{third-party device manufacturers} and develop three smart systems using the APIs. Finally, we again play the role of the \textit{major organization} and verify  the code of the controllers developed by the third parties. 
-
-
+ To further scope our research for this project, we assume that the sensors and dumb-devices are not compromised and that the former always store the latest values of the properties they measure. We also assume that the dumb devices trust the commands they receive from the controllers and atomically execute them. Additionally, we consider the communication protocol to be trusted and do not focus on man-in-the-middle attacks.
 % policies are safe/cannot be compromised
 % focus on attacks that compromise controllers by malicious parties -> try to control the dumb device illegally through the controller
 % sensors are not compromised, always updating % broadcasting the latest sensor values
@@ -155,7 +151,7 @@ All the above policies are important when it comes to ensuring the security of a
 \label{subsec:dep}
 Let $k$ denote the controller for some dumb device and $c$ denote a command that it sends to the dumb device, based on the values of the sensors it relies on, jointly represented as $P$ (for properties). 
 There are two types of policies of interest:
-\begin{itemize}
+\begin{itemize}[topsep=0pt,itemsep=0ex,partopsep=1ex,parsep=1ex]
 \item \textit {policies based on complete specification}: A command is sent if and only if some conditions hold. This is represented as: $k ~\textbf{sends}~ c~\Leftrightarrow~P$.  
 
 For example:
@@ -171,34 +167,24 @@ The generic structure of the above two types of policies are respectively:
 
 \hspace{2cm}$(device\_controller) ~\textbf{sends}~(c) \Rightarrow \langle \mathit{sensor\_variable = state}\rangle^{+}$ \\
 
-\noindent Below are two examples of dependency policies for the smart garage door system and the smart laundry system. Due to lack of space, we omit the rest of the dependency policies. 
+\noindent Below are two examples of dependency policies for the smart garage door system and the smart laundry system. The rest of the dependency policies can be seen in the xml policy files in our code repository\footnote{\label{note1}The code is here: https://gitlab.cs.washington.edu/cnandi/my-stuff}. 
 \begin{itemize}
 \item  The garage door opens if and only if it is closed, the owner is inside the car, and the car is either approaching nearby or running within the garage. \vspace{.1cm}
 
 \small{
-$\mathit {GARAGE\_DOOR\_CONTROLLER ~\textbf{sends}~open\_garagedoor}\Leftrightarrow \\ \mathit{(\neg IS\_GARAGE\_OPEN)}\\ \wedge \mathit{((\neg IS\_CAR\_INSIDE\_GARAGE}~ \wedge~ \mathit{CAR\_DISTANCE \leq ``50m"} \wedge \mathit{CAR\_SPEED \neq 0)} \\ \hspace*{0.5cm}\vee \mathit{(IS\_CAR\_INSIDE\_GARAGE} \wedge \mathit{IS\_CAR\_RUNNING))}  \\ \wedge \mathit{(IS\_OWNER\_INSIDE\_CAR)} 
+$\mathit {GARAGE\_DOOR\_CONTROLLER ~\textbf{sends}~open\_garagedoor}\Leftrightarrow \\ \mathit{(\neg IS\_GARAGE\_OPEN)} \wedge \mathit{((\neg IS\_CAR\_INSIDE\_GARAGE}~ \wedge~ \mathit{CAR\_DISTANCE \leq ``50m"} \wedge \mathit{CAR\_SPEED \neq 0)} \\ \hspace*{0.5cm}\vee \mathit{(IS\_CAR\_INSIDE\_GARAGE} \wedge \mathit{IS\_CAR\_RUNNING))}  \wedge \mathit{(IS\_OWNER\_INSIDE\_CAR)} 
 $}
 
 \normalsize\item The laundry machine \textit{may} start when the doors are closed, the machine is not empty, the clothes are not already clean, and the machine is not already running.\vspace{.1cm}
 
-\small{$\mathit{LAUNDRY\_MACHINE\_CONTROLLER} ~\textbf{sends}~ \mathit{start\_washer}~\Rightarrow\\
-\mathit{(IS\_DOOR\_CLOSED)} \\ \wedge \mathit{(\neg IS\_EMPTY)}\\ \wedge \mathit{(\neg IS\_CLEAN)} \\ \wedge \mathit{(\neg IS\_WASHER\_ON)}  $}
+\small{$\mathit{LAUNDRY\_MACHINE\_CONTROLLER} ~\textbf{sends}~ \mathit{start\_washer}~\Rightarrow
+\mathit{(IS\_DOOR\_CLOSED)} \wedge \mathit{(\neg IS\_EMPTY)}\\ \wedge \mathit{(\neg IS\_CLEAN)} \wedge \mathit{(\neg IS\_WASHER\_ON)}  $}
 \end{itemize}
 
 \subsection{Control policy}
 \label{subsec:control}
-
-A dumb device may be controlled by more than one controller in the sense that one controller may be capable of sending some commands to it while another controller may send some other commands. At the same time, a single controller may control more than one dumb device. We use the terms ``legal" and ``illegal" to refer to dumb devices which may and may not be controlled by a controller respectively.
-There are several possible wrong scenarios:
-\begin{enumerate}
-\item a controller sending an executable command to an ``illegal" dumb device. For example, if the garage door controller sends \texttt{open\_maindoor} to the main door. The main door can execute the command \texttt{open} and since it is a dumb device, it simply executes the command without verifying the sender. This is a security loophole which can be exploited to gain access to the house. 
-
-\item a controller sending an executable but wrong command to a ``legal" dumb device. For example, if the garage door controller sends \texttt{open\_maindoor} to the garage door. The garage door is capable of executing \texttt{open}, so it will open up but this is not the correct behaviour of the controller.
-
-\item a controller sending non-executable commands to ``illegal" dumb device. For example, if the garage door controller sends \texttt{open\_garagedoor} to the coffee maker and the coffee maker can only execute start and stop. In this case since the command is not executable by the receiving dumb device, it  will never get executed but nevertheless it is an indication of incorrect behaviour of the controller.   
-\end{enumerate}
-
-The control policy ensures that the above scenarios do not happen. According to the specification of a controller defined by a \textit{major organization}, every controller $k$ has a list of $n > 0$ commands it can send: $ C = \{c_1, c_2, ..., c_n\}$. $k$ also maintains a list of $m \geq 0$ ``legal" dumb devices (this would be implemented by a device discovery mechanism) and for every dumb device $d_i$,  a set of $l_i > 0$ commands it may send to them. Let this list be represented as: \\ $D_{m}= \{(d_{1}, c_{11}), ..., (d_{1}, c_{1l_1}), (d_{2}, c_{21}), ..., (d_{2}, c_{2l_2}), ..., (d_{m}, c_{m1}), ..., (d_m, c_{ml_m})\}$. \\
+We use the terms ``legal" and ``illegal" to refer to dumb devices which may and may not be controlled by a controller respectively and ``executable" and ``non-executable" to refer to commands that can and cannot be executed by a dumb device respectively. The only correct scenario is when a controller sends an ``executable" command to a ``legal" dumb device. 
+The control policy ensures that any other scenarios does not happen. According to the specification of a controller defined by a \textit{major organization}, every controller $k$ has a list of $n > 0$ commands it can send: $ C = \{c_1, c_2, ..., c_n\}$. $k$ also maintains a list of $m \geq 0$ ``legal" dumb devices (this would be implemented by a device discovery mechanism) and for every dumb device $d_i$,  a set of $l_i > 0$ commands it may send to them. Let this list be represented as: \\ $D_{m}= \{(d_{1}, c_{11}), ..., (d_{1}, c_{1l_1}), (d_{2}, c_{21}), ..., (d_{2}, c_{2l_2}), ..., (d_{m}, c_{m1}), ..., (d_m, c_{ml_m})\}$. 
 
 %\noindent Every dumb device, $d_{i} \in D_{m}$ has a set of $n_i \geq 0$ actions it can execute: $A_{n_{i}}=\{a_{i1}, a_{i2}, ... a_{i{n_{i}}}\}$. 
 \noindent The control policy states that:\\
@@ -210,19 +196,12 @@ $ (\exists~ j \in \{1, 2, ..., m\}~|~ \mathit{\texttt{dumbdevice} = d_j)}~\wedge
 \subsection{Information flow policy}
 \label{subsec:information}
 This policy ensures that sensitive information from a smart home is not leaked to the outside world without user's permission or proper anonymization.
-This policy can be verified using a type system. If $d$ is some data that an device gathers from a smart home, it is annotated as \texttt{sensitive} or \texttt{non\_sensitive}. 
-Let $L_d$ denote a list of all the destinations to which $d$ may be sent. Then the policy states that if $d$ is not sensitive, then it may be sent to any of the allowed destinations. If it is sensitive, then before sending it anywhere, it should pass through the user's scrutiny. The user may either decide not to send it anywhere or to anonymize it before sending it to some destinations that seem fit. This is represented using an ordered pair, the first element of which describes the action to be performed, and the second element is a list of destinations allowed. The ordered pairs can be of two types, \vspace{-7pt}
+This policy can be verified using a type system similar to \cite{ernst}. If $d$ is some data that an device gathers from a smart home, it is annotated as \texttt{sensitive} or \texttt{non\_sensitive}. 
+Let $L_d$ denote a list of all the destinations to which $d$ may be sent. Then the policy states that: if $d$ is not sensitive, then it may be sent to any of the allowed destinations. If it is sensitive, then before sending it anywhere, it should pass through the user's scrutiny. The user may either decide not to send it anywhere or to anonymize it before sending it to some destinations that seem fit. This is represented using an ordered pair, the first element of which describes the action to be performed, and the second element is a list of destinations allowed. The ordered pairs can be of two types, \vspace{-7pt}
 \begin{itemize}
 \itemsep0em 
 \item \texttt{(keep\_secret, [])}: if $d$ has to be kept secret, then the list of destinations will be an empty list.
 \item \texttt{(anonymize, [$D_1, D_2, ..., D_m$])}: first $d$ is anonymized and then it may be sent to one or more of these m ($\geq1$) destinations where $\{D_1, D_2, ..., D_m\} \subseteq L_d$. 
-\end{itemize}\vspace{-5pt}
-To summarize, \vspace{-10pt}
-\begin{itemize}
-\itemsep0em 
-\item $d.\mathit{type}= \mathit{sensitive} ~\wedge~ \mathit{USER\_DECISION}= (\mathit{keep\_secret}, []) \Rightarrow d.\mathit{destination} = []$
-\item $d.\mathit{type}= \mathit{sensitive} ~ \wedge ~ \mathit{USER\_DECISION}= (\mathit{anonymize}, [{D}_{1}, {D}_{2}, ..., {D}_{m}]) \Rightarrow \\ d.\mathit{is\_{anonymized} = true} ~\wedge~ \\ d.\mathit{destination} \in [{D}_{1}, {D}_{2}, ..., {D}_{m}]$ 
-\item $d.\mathit{type}= \mathit{non\_sensitive} \Rightarrow  d.\mathit{destination} \in L_d$ 
 \end{itemize}
 
 \section{Static Analysis}
@@ -236,24 +215,41 @@ Static analysis is a way to provide compile time guarantees that the code does n
 \label{fig:dynamic}
 \end{center}
 \end{figure}
- 
-To explain the analysis, we first give a brief description of how we implemented our smart home simulation. As we saw earlier, there are three types of devies: controllers, sensors and dumb devices. The controllers send commands to the dumb devices depending on the values of one or more sensors. The sensor-controller dependency is implemented as an observer-pattern: the sensors are subjects and controllers are observers. A controller can be the observer of multiple sensors. Whenever a sensor updates the value of a variable (due to change in the value of the parameter it measures), it notifies all its observers. Whenever an observer (controller) is notified, it invokes an \texttt{update()} method
+As we explained in section~\ref{subsec:roles}, the verification is done by the \textit{major organizations}. They release APIs which are used by the third-party manufacturers to develop different types of devices so that they can be integrated to the platform of the major organizations.  
+
+To explain the analysis, we first give a brief description of how we implemented our smart home simulation. As we saw earlier, there are three types of devices: controllers, sensors and dumb devices. The controllers send commands to the dumb devices depending on the values of one or more sensors. The sensor-controller dependency is implemented as an observer-pattern: the sensors are subjects and controllers are observers. A controller can be the observer of multiple sensors. Whenever a sensor updates the value of a variable (due to change in the value of the parameter it measures), it notifies all its observers. Whenever an observer (controller) is notified, it invokes an \texttt{update()} method inside which it sends a command to a dumb-device, after checking whether the latter can execute the command. This is done by invoking a method: \texttt{checkExecutabilityAndSend(new Command("action\_dumbdevice"))}. 
 We verify the following three properties using static analysis:
 \begin{enumerate}[topsep=0pt,itemsep=-1ex,partopsep=1ex,parsep=1ex]
-    \item A command is sent only within an \texttt{update()} method.
+    \item A command is sent only within an \texttt{update()} method, i.e. \\
+    \texttt{checkExecutabilityAndSend(new Command("action\_dumbdevice"))} is always invoked inside the \texttt{update()} method.
     \item A command is sent only after checking certain conditions inside an \texttt{if-statement}.
     \item A conditions checked in the \texttt{if-statement} are correct according to the policy file of the respective controller.
 \end{enumerate}
+To further elaborate items 2 and 3 above, let us consider the example of the smart laundry system. Figure~\ref{fig:policy} shows the dependency policies for the laundry machine controller as defined by a \textit{major organization}, represented in xml format. 
 
+\begin{figure}[h]
+\begin{center}
+\includegraphics[scale=0.7, trim = 0 21.5cm 0 2cm]{policy.pdf}
+\caption{Dependency policies for the laundry machine controller.}
+\label{fig:policy}
+\end{center}
+\end{figure}
+\begin{figure}[h]
+\begin{center}
+\includegraphics[scale=0.7, trim = 0 21.5cm 0 2cm]{code.pdf}
+\caption{\texttt{Update()} for the laundry machine controller.}
+\label{fig:code}
+\end{center}
+\end{figure}
 \section{Implementation}
 The implementation has two parts: 
 \begin{itemize}
 \item A simulation of the smart home architecture described in section~\S\ref{sec:archi} together with three smart systems that can be executed on top of it. Table~\ref{table:appliance_sensor} provides a summary of the three smart systems. 
 \begin{table*}[h]
 \begin{center}
-\begin{tabular}{|p{4cm}|p{5cm}|p{4.5cm}|p{3.5cm}|}
+\begin{tabular}{|p{4cm}|p{5cm}|p{4.5cm}|p{3cm}|}
 \hline
-controller & commands & sensors & \#dependency policies \\ \hline
+controller & commands & sensors & \#dependency \newline policies \\ \hline
 \tiny{LAUNDRY\_MACHINE\_CONTROLLER} \tiny{ (for dumb device: laundry machine)} &
 \small start\_washer, \small stop\_washer & 
 \tiny{IS\_WASHER\_ON}, \newline \tiny{IS\_EMPTY, \newline IS\_DOOR\_CLOSED, \newline IS\_CLEANED} & 2\\ \hline
@@ -274,7 +270,9 @@ controller & commands & sensors & \#dependency policies \\ \hline
 \end{table*}
 \item A static analyser that verifies whether the controllers in a smart system comply with their security policy specifications.
 \end{itemize}   
-The entire implementation is done in java. The smart home architecture together with the benchmarks (the three smart systems) has approx. 1300 LOC\footnote{The code is here: https://gitlab.cs.washington.edu/cnandi/my-stuff} and the static analyser has approx. 300 LOC. To simulate the sensors measuring different parameters and updating the corresponding sensor variables, we use pseudorandom number generators in appropriate ranges. 
+In this project, we first play the role of a \textit{major organization} and develop the APIs, formalize the specification language, and implement the verification tools. Then we play the role of the \textit{third-party device manufacturers} and develop three smart systems using the APIs. Finally, we again play the role of the \textit{major organization} and verify  the code of the controllers developed by the third parties.
+
+The entire implementation is done in java. The smart home architecture together with the benchmarks (the three smart systems) has approx. 1300 LOC\footref{note1} and the static analyser has approx. 300 LOC. To simulate the sensors measuring different parameters and updating the corresponding sensor variables, we use pseudorandom number generators in appropriate ranges. 
 
 
 We implemented our static analysis tool as a checker on top of Google's error-prone framework~\cite{errorprone}. Error prone is a static analyser for Java and provides an API which can be used to develop different types of program analysis tools. As a part of the static analysis, we also developed a dataflow analysis for verifying the third item mentioned in section~\S\ref{sec:analysis}. The dataflow analyser parses the conditions checked in the \texttt{if-statement} and the statements inside its body to find the command being sent, searches for the policy file (represented in xml format) of the controller, compares the conditions to the policies (sensor values or range of values) in that file, and verifies that the conditions match with those in the policy file for the command being sent inside the body. 
