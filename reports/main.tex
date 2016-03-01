@@ -6,13 +6,13 @@
 \usepackage{url}
 \usepackage[usenames, dvipsnames]{color}
 \usepackage[utf8]{inputenc}
-\title{\textbf{CSE 564 Project Report} 
+\title{\textbf{CSE 564 Project Report (Draft)} 
 \\
 \begin{center}
 \LARGE{Design and Verification of Home-automation Systems}
 \end{center}\vspace{-2ex}}
 \author{Jeanette Daum (jdaum), Chandrakana Nandi (cnandi) }
-\date{March 14, 2016}
+\date{March 3, 2016}
 
 \begin{document}
 
@@ -31,10 +31,10 @@ A challenge for smart homes is to ensure that there are no security loopholes be
 In this project, our goal is to ensure that a system of interacting smart devices satisfies a set of security properties. We are concerned with security at the device level and not with the security of the communication protocols or the underlying operating system. We aim to solve the problem of security for smart homes from the point of view of the manufacturers of the smart devices so that they can guarantee that their devices are secure and correct. Section~\S\ref{subsec:roles} describes the roles played by manufacturers of devices, users and major organizations (such as Samsung, Apple, etc.) in our model in detail.
 
 We have modelled a smart home as a collection of three types of devices: controllers, sensors and dumb-devices. The controllers send commands to the dumb-devices based on values of sensors which measure different parameters such as temperature, state of a dumb-device, etc. The dumb-devices simply execute the commands sent to them.
-We defined a set of security policies and specified them for three different smart systems: an automatic laundry system, an automatic garage door system and a thermostat. We developed a static analyzer that verifies that the three smart systems adhere to their respective policies. By conducting a preliminary experiment explained in section~\S\ref{sec:analysis}, we show that for smart homes, dynamically enforcing security policies can lead to a large overhead which may affect the reliability of the system. This motivates our decision of doing static program verification to provide compile time guarantees that a smart home is secure. Our main contributions are:
+We defined a set of security policies and specified them for three different smart systems: a smart laundry system, a smart garage door system and an HVAC system. We developed a static analyzer that verifies that the three smart systems adhere to their respective policies. By conducting a preliminary experiment explained in section~\S\ref{sec:analysis}, we show that for smart homes, dynamically enforcing security policies can lead to a large overhead which may affect the reliability of the system. This motivates our decision of doing static program verification to provide compile time guarantees that a smart home is secure. Our main contributions are:
 \begin{itemize}[topsep=0pt,itemsep=0ex,partopsep=1ex,parsep=1ex]
-    \item Designing a smart home architecture, implementing a prototype of the architecture and three smart systems based on it.    
-    \item Defining and formalizing different types of security and correctness policies and specifying them for the three smart systems.
+    \item Designing a smart home architecture, implementing a prototype of the architecture and three smart systems based on it; a smart laundry system, a smart garage door, and an HVAC system.    
+    \item Defining and formalizing different types of security and correctness policies and specifying one of them for the three smart systems.
     \item Developing a static analysis tool for verifying the code of the smart systems.
     \item Analysing the roles played by different organizations/individuals in the smart home business and proposing a model for distributing the tasks of specification, implementation and verification among them.
 \end{itemize}
@@ -80,14 +80,16 @@ In our high-level architecture, we abstract away the lower level details of a sm
 \label{subsec:roles}
 We consider the entire smart home business to comprise of four different groups playing different roles. We propose a hierarchical authentication mechanism to ensure that smart homes satisfy certain security and correctness standards. The  mechanism is hierarchical so that it can scale to a very large number of manufacturers who are interested in developing smart devices.   
 \begin{itemize}[topsep=0pt,itemsep=0ex,partopsep=1ex,parsep=1ex]
-\item \textit{Standard organizations}: Similar to standards like IEEE and IEC, we propose organizations to be developed for specifying certain standards for smart homes. The organizations would define security, privacy and correctness specifications which would ideally be met by all smart devices. An example specification related to information flow could be that information from within the smart home should not be sent to the cloud without user permission. Another example of a specification related to access control could be that the controller of a certain category of devices may not control devices which do not fall in that category (a garage door and a coffee maker would not be in the same category). Yet another example of a specification related to sensor dependency could be that a controller may send a command only under certain sensor conditions.
-\item \textit{Major organizations}: We define major organizations as companies such as Samsung~\cite{samsung}, Apple~\cite{homekit}, etc. who provide platforms (hubs or apps) for integrating different smart devices and communication protocols to make them interact with each other or allow the users to control them remotely. In our model, we consider these organizations to have their own methodology for specifying the standards defined by the \textit{standard organizations} and verifying devices against them. For example the methodology could be a domain specific language for specifying the policies and a type system for verifying them.
+\item \textit{Standard organizations}: Similar to standards like IEEE and IEC, we propose organizations to be developed for specifying certain standards for smart homes. The organizations would define security, privacy and correctness specifications which should ideally be met by all smart devices. An example specification related to information flow could be that information from within the smart home should not be sent to the cloud without user permission. Another example of a specification related to access control could be that the controller of a certain category of devices may not control devices which do not fall in that category (a garage door and a coffee maker would not be in the same category). Yet another example of a specification related to sensor dependency could be that a controller may send a command only under certain sensor conditions.
+\item \textit{Major organizations}: We define major organizations as companies such as Samsung~\cite{samsung}, Apple~\cite{homekit}, etc. who provide platforms (hubs or apps) for integrating different smart devices and communication protocols to make them interact with each other or allow the users to control them remotely. In our model, we consider these organizations to have their own methodology for specifying the standards defined by the \textit{standard organizations} and verifying devices against them. For example the methodology could be a domain specific language for specifying the policies and a type system for verifying them. 
 These organizations would be inspected by the \textit{standard organizations} and marked as ``authentic" if the \textit{standard organizations} find that their mechanisms for specifying and verifying the standards are acceptable.
 
 
-\item \textit{Third-party device manufacturers}: They are the companies like Philips, Withings and numerous other small manufacturers who develop \textit{controllers}, \textit{dumb-devices} and \textit{sensors}~\cite{workswithsmartthings, workswithhomekit} which can be integrated to the platforms developed by the \textit{major organizations}. The major organizations themselves can also be device manufacturers; both Samsung and Apple manufacture their own smart devices. Before  allowing any device manufactured by a third party device manufacturer to be integrated to their platform, the major organizations must verify the code against the specifications. The devices that pass the verification would be marked as ``authentic" and may be trusted. 
+\item \textit{Third-party device manufacturers}: They are the companies like Philips, Withings and numerous other small manufacturers who develop \textit{controllers}, \textit{dumb-devices} and \textit{sensors}~\cite{workswithsmartthings, workswithhomekit} which can be integrated to the platforms developed by the \textit{major organizations}. The latter themselves can also be device manufacturers; both Samsung and Apple manufacture their own smart devices. 
+The \textit{major organizations} would release APIs for implementing devices which can be used by third-party device manufacturers so that their products can be integrated to the platforms of the former.
+Before  allowing any device manufactured by a third party to be integrated to their platform, the major organizations must verify the code against the specifications. The devices that pass the verification would be marked as ``authentic" and may be trusted. 
 
-\item \textit{End users}: They are the home inhabitants who own (or want to own) a smart home. An end user might want to buy a hub (or app) from one of the existing \textit{major organizations} to plug in different smart devices bought either from the \textit{major organizations} or from some \textit{third-party device manufacturer} and convert their ordinary home to a smart home. As long as the devices are marked as ``authentic" by one of the \textit{major organizations}, the user can trust it due to the hierarchical authentication mechanism.
+\item \textit{End users}: They are the home inhabitants who own (or want to own) a smart home. An end user might want to buy a hub (or app) from one of the existing \textit{major organizations} to plug in different smart devices bought either from the \textit{major organizations} or from some \textit{third-party device manufacturer} and convert their ordinary home to a smart home. As long as the devices are marked as ``authentic" by one of the \textit{major organizations}, the end user can trust them due to the hierarchical authentication mechanism.
 \end{itemize}
 
 
@@ -115,13 +117,17 @@ These days, there are numerous third party manufacturers developing smart device
 Our threat model is a third-party device manufacturer, $X$, developing \textit{controllers} which can be exploited to send commands to dumb-devices under incorrect sensor conditions. An attacker who is aware of the fact that the controller is bought from $X$ and knows that it has security vulnerabilities can exploit it to make the smart home behave in unexpected ways. For example, consider a garage door which is only supposed to open when the owner's car is within 50m from it. If its controller is ``faulty" in the sense that it sends commands to the garage door under arbitrary sensor conditions such as whenever a car is within 50m from it, irrespective of whether the home owner (or another authorized person) is driving it, then an attacker can gain easy access to the house through the garage door. 
 In other words, we do not trust a controller developed by a third-party device manufacturer. 
 
-The trusted components are the \textit{standard organizations} and the \textit{major organizations}. As a result, we also consider the standards set by the former, and the specifications and the verification tools developed by the latter to be trusted components.
+The trusted components are the \textit{standard organizations} and the \textit{major organizations}. As a result, we also consider the standards set by the former, and the specifications and the verification tools (and devices) developed by the latter to be trusted components.
 Only if a device manufactured by a \textit{third-party device manufacturer} is marked as ``authentic" by a \textit{major organization} after verifying its implementation against the specifications, can it be trusted by an end user. 
 The \textit{end users} who own the smart homes are themselves trusted to not attack their own homes for any reason. 
 
-The specification and verification of policies is done by the \textit{major organizations} and the development of the devices is done either by the \textit{major organizations} or \textit{third-party device manufacturers}. All the four groups described in section~\S\ref{subsec:roles} are stakeholders in this model. The \textit{end users} because they are directly affected by any security loophole and the other three organizations because their business will fail if they lose the trust of the \textit{end users}.\\ 
+The specification and verification of policies is done by the \textit{major organizations} and the development of the devices is done either by the \textit{major organizations} or \textit{third-party device manufacturers}. All the four groups described in section~\S\ref{subsec:roles} are stakeholders in this model. The \textit{end users} because they are directly affected by any security loophole and the other three organizations because their business will fail if they lose the trust of the \textit{end users}.
 
- To further scope our research for this project, we assume that the sensors and dumb-devices are not compromised and that the former always store the latest values of the properties they measure. We also assume that the dumb devices trust the commands they receive from the controllers and atomically execute them. Additionally, we consider the communication protocol to be trusted and do not focus on man-in-the-middle attacks. 
+ To further scope our research for this project, we assume that the sensors and dumb-devices are not compromised and that the former always store the latest values of the properties they measure. We also assume that the dumb devices trust the commands they receive from the controllers and atomically execute them. Additionally, we consider the communication protocol to be trusted and do not focus on man-in-the-middle attacks. \\
+ 
+ As we explained in section~\ref{subsec:roles}, the verification is done by the \textit{major organizations}. They release APIs which are used by the third-party manufacturers to develop different types of devices so that they can be integrated to the platform of the major organizations. 
+
+In this project, we first play the role of a \textit{major organization} and develop the APIs, formalize the specification language, and implement the verification tools. Then we play the role of the \textit{third-party device manufacturers} and develop three smart systems using the APIs. Finally, we again play the role of the \textit{major organization} and verify  the code of the controllers developed by the third parties. 
 
 
 % policies are safe/cannot be compromised
@@ -134,11 +140,11 @@ The specification and verification of policies is done by the \textit{major orga
 \label{sec:policies}
 We formally define three types of security policies that should be satisfied by a home automation system. Our policies focus on the behaviour of the controllers and their interaction with the other devices in a smart home. 
 \begin{itemize}
-\item Dependency policy (\S\ref{subsec:dep}): We formally specify policies for each controller that state under what circumstances (sensor values) a controller is allowed to send a command.
+\item Dependency policy (\S\ref{subsec:dep}): This policy states the  conditions (sensor values) under which a controller is allowed to send a command.
 
-\item Control policy (\S\ref{subsec:control}): A controller should only send correct commands to correct dumb devices. For example, the bedroom light controller should not control the lights in the living room.
+\item Control policy (\S\ref{subsec:control}): This policy states that a controller should only send correct commands to correct dumb devices. For example, the bedroom light controller should not control the lights in the living room.
 
-\item Information flow policy (\S\ref{subsec:information}): This policy ensures that sensitive information from within a smart home is not leaked or sent to the cloud without user permissions or proper anonymization. 
+\item Information flow policy (\S\ref{subsec:information}): This policy ensures that sensitive information from within a smart home is not leaked to the outside world without user permissions or proper anonymization. 
 \end{itemize}
 There are many other policies which are interesting for a smart home such as \textit{temporal policies} which ensures that the events happening in a smart home respect certain timing constraints and \textit{new device policy} which ensures that when a new device is added to a smart home, it should not cause violation any of the other policies assuming that they were satisfied before the integration of the new device.
 
@@ -164,6 +170,20 @@ The generic structure of the above two types of policies are respectively:
 \hspace{2cm}$(device\_controller) ~\textbf{sends}~(c) \Leftrightarrow \langle \mathit{sensor\_variable = state}\rangle^{+}$ 
 
 \hspace{2cm}$(device\_controller) ~\textbf{sends}~(c) \Rightarrow \langle \mathit{sensor\_variable = state}\rangle^{+}$ \\
+
+\noindent Below are two examples of dependency policies for the smart garage door system and the smart laundry system. Due to lack of space, we omit the rest of the dependency policies. 
+\begin{itemize}
+\item  The garage door opens if and only if it is closed, the owner is inside the car, and the car is either approaching nearby or running within the garage. \vspace{.1cm}
+
+\small{
+$\mathit {GARAGE\_DOOR\_CONTROLLER ~\textbf{sends}~open\_garagedoor}\Leftrightarrow \\ \mathit{(\neg IS\_GARAGE\_OPEN)}\\ \wedge \mathit{((\neg IS\_CAR\_INSIDE\_GARAGE}~ \wedge~ \mathit{CAR\_DISTANCE \leq ``50m"} \wedge \mathit{CAR\_SPEED \neq 0)} \\ \hspace*{0.5cm}\vee \mathit{(IS\_CAR\_INSIDE\_GARAGE} \wedge \mathit{IS\_CAR\_RUNNING))}  \\ \wedge \mathit{(IS\_OWNER\_INSIDE\_CAR)} 
+$}
+
+\normalsize\item The laundry machine \textit{may} start when the doors are closed, the machine is not empty, the clothes are not already clean, and the machine is not already running.\vspace{.1cm}
+
+\small{$\mathit{LAUNDRY\_MACHINE\_CONTROLLER} ~\textbf{sends}~ \mathit{start\_washer}~\Rightarrow\\
+\mathit{(IS\_DOOR\_CLOSED)} \\ \wedge \mathit{(\neg IS\_EMPTY)}\\ \wedge \mathit{(\neg IS\_CLEAN)} \\ \wedge \mathit{(\neg IS\_WASHER\_ON)}  $}
+\end{itemize}
 
 \subsection{Control policy}
 \label{subsec:control}
@@ -205,33 +225,6 @@ To summarize, \vspace{-10pt}
 \item $d.\mathit{type}= \mathit{non\_sensitive} \Rightarrow  d.\mathit{destination} \in L_d$ 
 \end{itemize}
 
-\section{Case studies}
-\label{benchmarks}
-We developed a simulation of a smart home architecture and three smart systems that can be run on top of the architecture. Table~\ref{table:appliance_sensor} provides a summary of the three smart systems. 
-
-\begin{table*}[h]
-\begin{center}
-\begin{tabular}{|p{4cm}|p{6cm}|p{4.5cm}|}
-\hline
-controller & commands & sensors \\ \hline
-\tiny{GARAGE\_DOOR\_CONTROLLER} \tiny{(for dumb: device garage door)} & 
-\small{open\_garagedoor, close\_garagedoor}\tiny &  
-\tiny{IS\_GARAGE\_OPEN, \newline IS\_CAR\_INSIDE\_GARAGE, \newline IS\_CAR\_RUNNING, \newline IS\_OWNER\_INSIDE\_CAR,\newline CAR\_DISTANCE (double), \newline CAR\_SPEED (double)} \\ \hline
-
-\tiny{LAUNDRY\_MACHINE\_CONTROLLER} \tiny{ (for dumb: device laundry machine)} &
-\small start\_washer, \small stop\_washer & 
-\tiny{IS\_WASHER\_ON}, \newline \tiny{IS\_EMPTY, \newline IS\_DOOR\_CLOSED, \newline IS\_CLEANED} \\ \hline
-
-\tiny{THERMOSTAT} \tiny{(for dumb devices: room heater and air conditioner)} & 
-\small start\_roomheater,\newline \small stop\_roomheater,\newline\small start\_airconditioner, \newline \small stop\_airconditioner & 
-\tiny{IS\_ROOMHEATER\_ON}, \tiny{IS\_AIRCONDITIONER\_ON},
-\tiny{IS\_HOUSE\_EMPTY, \newline IS\_WINDOW\_OPEN, \newline IS\_DOOR\_OPEN, IS\_TEMP\_BELOW\_LOWERTHRESHOLD, IS\_TEMP\_ABOVE\_UPPERTHRESHOLD}, \tiny{OWNER\_DISTANCE (double)}\\ \hline
-\end{tabular}
-\caption{\small{An example smart home with three smart systems. Each sensor variable has type boolean unless otherwise indicated in parentheses.}}
-\label{table:appliance_sensor}
-\end{center}
-\end{table*}
-
 \section{Static Analysis}
 \label{sec:analysis}
 Static analysis is a way to provide compile time guarantees that the code does not violate correctness and security specifications. Static techniques have certain advantages over dynamic techniques (like testing or dynamic policy enforcement) such as it does not rely on the quality of the test suite and does not require the code to be executed. In case of safety critical applications, static analysis is better than dynamic analysis because approaches like testing may not capture all possible corner cases and may fail to detect certain bugs thereby having severe consequences while dynamic enforcement of policies may add unnecessary overhead thereby making the system unreliable. We performed a preliminary experiment with the automatic laundry system and found that the execution times were much higher with dynamic policy enforcement and hence decided to develop a static analyzer for the smart home. Figure~\ref{fig:dynamic} shows the execution times for the laundry system. 
@@ -243,6 +236,8 @@ Static analysis is a way to provide compile time guarantees that the code does n
 \label{fig:dynamic}
 \end{center}
 \end{figure}
+ 
+To explain the analysis, we first give a brief description of how we implemented our smart home simulation. As we saw earlier, there are three types of devies: controllers, sensors and dumb devices. The controllers send commands to the dumb devices depending on the values of one or more sensors. The sensor-controller dependency is implemented as an observer-pattern: the sensors are subjects and controllers are observers. A controller can be the observer of multiple sensors. Whenever a sensor updates the value of a variable (due to change in the value of the parameter it measures), it notifies all its observers. Whenever an observer (controller) is notified, it invokes an \texttt{update()} method
 We verify the following three properties using static analysis:
 \begin{enumerate}[topsep=0pt,itemsep=-1ex,partopsep=1ex,parsep=1ex]
     \item A command is sent only within an \texttt{update()} method.
@@ -251,9 +246,38 @@ We verify the following three properties using static analysis:
 \end{enumerate}
 
 \section{Implementation}
-The implementation has two parts: a simulation of the smart home architecture described in section~\S\ref{sec:archi} together with three smart systems based on it, and a static analyser that verifies whether the controllers in a smart system comply with their security policy specifications. The entire implementation is done in java. The smart home architecture together with the benchmarks (the three smart systems) has approx. 1300 LOC\footnote{The code is here: https://gitlab.cs.washington.edu/cnandi/my-stuff} and the static analyser has approx. 300 LOC. . 
- 
-For the static analysis tool, we built a checker on top of Google's error-prone framework~\cite{errorprone}. Error prone is a static analyser for Java and provides an API which can be used to develop different types of program analysis tools. As a part of the static analysis, we also developed a dataflow analysis for verifying the third item mentioned in section~\S\ref{sec:analysis}. The dataflow analyser parses the conditions inside the \texttt{if-statement} and its body, and compares them to the policies of the respective controller in the xml file and verifies if they are the correct conditions for the command being sent inside the body of the \texttt{if-statement}. 
+The implementation has two parts: 
+\begin{itemize}
+\item A simulation of the smart home architecture described in section~\S\ref{sec:archi} together with three smart systems that can be executed on top of it. Table~\ref{table:appliance_sensor} provides a summary of the three smart systems. 
+\begin{table*}[h]
+\begin{center}
+\begin{tabular}{|p{4cm}|p{5cm}|p{4.5cm}|p{3.5cm}|}
+\hline
+controller & commands & sensors & \#dependency policies \\ \hline
+\tiny{LAUNDRY\_MACHINE\_CONTROLLER} \tiny{ (for dumb device: laundry machine)} &
+\small start\_washer, \small stop\_washer & 
+\tiny{IS\_WASHER\_ON}, \newline \tiny{IS\_EMPTY, \newline IS\_DOOR\_CLOSED, \newline IS\_CLEANED} & 2\\ \hline
+
+
+\tiny{GARAGE\_DOOR\_CONTROLLER} \tiny{(for dumb device: garage door)} & 
+\small{open\_garagedoor, close\_garagedoor}\tiny &  
+\tiny{IS\_GARAGE\_OPEN, \newline IS\_CAR\_INSIDE\_GARAGE, \newline IS\_CAR\_RUNNING, \newline IS\_OWNER\_INSIDE\_CAR,\newline CAR\_DISTANCE (double), \newline CAR\_SPEED (double)} & 4\\ \hline
+
+\tiny{THERMOSTAT} \tiny{(for dumb devices: room heater and air conditioner)} & 
+\small start\_roomheater,\newline \small stop\_roomheater,\newline\small start\_airconditioner, \newline \small stop\_airconditioner & 
+\tiny{IS\_ROOMHEATER\_ON}, \tiny{IS\_AIRCONDITIONER\_ON},
+\tiny{IS\_HOUSE\_EMPTY, \newline IS\_WINDOW\_OPEN, \newline IS\_DOOR\_OPEN, IS\_TEMP\_BELOW\_LOWERTHRESHOLD, IS\_TEMP\_ABOVE\_UPPERTHRESHOLD}, \tiny{OWNER\_DISTANCE (double)} & 8\\ \hline
+\end{tabular}
+\caption{\small{An example smart home with three smart systems. Each sensor variable has type boolean unless otherwise indicated in parentheses.}}
+\label{table:appliance_sensor}
+\end{center}
+\end{table*}
+\item A static analyser that verifies whether the controllers in a smart system comply with their security policy specifications.
+\end{itemize}   
+The entire implementation is done in java. The smart home architecture together with the benchmarks (the three smart systems) has approx. 1300 LOC\footnote{The code is here: https://gitlab.cs.washington.edu/cnandi/my-stuff} and the static analyser has approx. 300 LOC. To simulate the sensors measuring different parameters and updating the corresponding sensor variables, we use pseudorandom number generators in appropriate ranges. 
+
+
+We implemented our static analysis tool as a checker on top of Google's error-prone framework~\cite{errorprone}. Error prone is a static analyser for Java and provides an API which can be used to develop different types of program analysis tools. As a part of the static analysis, we also developed a dataflow analysis for verifying the third item mentioned in section~\S\ref{sec:analysis}. The dataflow analyser parses the conditions checked in the \texttt{if-statement} and the statements inside its body to find the command being sent, searches for the policy file (represented in xml format) of the controller, compares the conditions to the policies (sensor values or range of values) in that file, and verifies that the conditions match with those in the policy file for the command being sent inside the body. 
 
 \section{Results}
 
