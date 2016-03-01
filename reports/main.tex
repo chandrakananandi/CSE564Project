@@ -48,7 +48,7 @@ In this paper, our idea is to specify security and correctness policies for the 
 We present a high-level modular architecture for designing smart homes which classifies devices into three categories depending on their functionality: \textit{sensors}, \textit{controllers} and \textit{dumb devices}. There are two types of messages exchanged among the devices: 
 \begin{itemize}[topsep=0pt,itemsep=-1ex,partopsep=1ex,parsep=1ex]
     \item \textit{informational}: Sensors broadcast information such as the state of a dumb device or the temperature in the house.  
-    \item \textit{commands}: Controllers send commands to the dumb devices telling them what to do.
+    \item \textit{commands}: Controllers send commands to the dumb devices telling them what to do. A command has two components, an action part and a dumb device part and is represented as:   \texttt{action\_dumbdevice}. The former represents what the receiving dumb device must do and the latter represents the type of dumb device that can execute the command.
 \end{itemize}
 
 \begin{figure}
@@ -132,19 +132,15 @@ The specification and verification of policies is done by the \textit{major orga
 
 \section{Security policies}
 \label{sec:policies}
-We define five types of security policies that should be satisfied by a home automation system. Our policies focus on the behaviour of the controllers and their interaction with the other devices in a smart home. 
+We formally define three types of security policies that should be satisfied by a home automation system. Our policies focus on the behaviour of the controllers and their interaction with the other devices in a smart home. 
 \begin{itemize}
 \item Dependency policy (\S\ref{subsec:dep}): We formally specify policies for each controller that state under what circumstances (sensor values) a controller is allowed to send a command.
 
 \item Control policy (\S\ref{subsec:control}): A controller should only send correct commands to correct dumb devices. For example, the bedroom light controller should not control the lights in the living room.
 
 \item Information flow policy (\S\ref{subsec:information}): This policy ensures that sensitive information from within a smart home is not leaked or sent to the cloud without user permissions or proper anonymization. 
-
-\item Temporal policy (\S\ref{subsec:time}): This policy ensures that the events happening in a smart home respect certain timing constraints.
-
-\item New device policy (\S\ref{subsec:newdevice}): This policy states that when a new device is added to a house, it should not cause the home to violate any of the other policies assuming that they were satisfied before the integration of the new device.
 \end{itemize}
-
+There are many other policies which are interesting for a smart home such as \textit{temporal policies} which ensures that the events happening in a smart home respect certain timing constraints and \textit{new device policy} which ensures that when a new device is added to a house, it should not cause the home to violate any of the other policies assuming that they were satisfied before the integration of the new device.
 All the above policies are important when it comes to ensuring the security of a smart home. However, in the interest of time, we are focusing our verification only on the \textit{Dependency policy} because as explained in section~\S\ref{sec:threat}, serious security breaches can occur when this policy is violated. 
 
 
@@ -181,33 +177,33 @@ There are several possible wrong scenarios:
 \item a controller sending non-executable commands to ``illegal" dumb device. For example, if the garage door controller sends \texttt{open\_garagedoor} to the coffee maker and the coffee maker can only execute start and stop. In this case since the command is not executable by the receiving dumb device, it  will never get executed but nevertheless it is an indication of incorrect behaviour of the controller.   
 \end{enumerate}
 
-The control policy ensures that the above scenarios do not happen.
-Every controller $k$ has a list of $n > 0$ commands it can send: $ C = \{c_1, c_2, ..., c_n\}$ which is a part of its specification. As mentioned in \S\ref{subsec:discovery}, $k$ maintains a list of $m \geq 0$ ``legal" dumb devices and for every dumb device $d_i$,  a set of $l_i > 0$ commands it may send to them. Let this list be represented as: \\ $D_{m}= \{(d_{1}, c_{11}), ..., (d_{1}, c_{1l_1}), (d_{2}, c_{21}), ..., (d_{2}, c_{2l_2}), ..., (d_{m}, c_{m1}), ..., (d_m, c_{ml_m})\}$. \\
+The control policy ensures that the above scenarios do not happen. According to the specification of a controller defined by a \textit{major organization}, every controller $k$ has a list of $n > 0$ commands it can send: $ C = \{c_1, c_2, ..., c_n\}$. $k$ also maintains a list of $m \geq 0$ ``legal" dumb devices (this would be implemented by a device discovery mechanism) and for every dumb device $d_i$,  a set of $l_i > 0$ commands it may send to them. Let this list be represented as: \\ $D_{m}= \{(d_{1}, c_{11}), ..., (d_{1}, c_{1l_1}), (d_{2}, c_{21}), ..., (d_{2}, c_{2l_2}), ..., (d_{m}, c_{m1}), ..., (d_m, c_{ml_m})\}$. \\
 
 %\noindent Every dumb device, $d_{i} \in D_{m}$ has a set of $n_i \geq 0$ actions it can execute: $A_{n_{i}}=\{a_{i1}, a_{i2}, ... a_{i{n_{i}}}\}$. 
 \noindent The control policy states that:\\
-
-\noindent $\forall~\mathit{\texttt{action\_dumbdevice}}$ sent by $k$, \\
-$\exists~ c_i \in C~|~\texttt{action\_dumbdevice} = c_i$, \\
-$ \exists~ j \in \{1, 2, ..., m\}~|~ \mathit{\texttt{dumbdevice} = d_j}$ and\\ $\texttt{action} \in \{c_{j1}, c_{j2}, ..., c_{jl_j}\}$
+\noindent $\forall~\mathit{\texttt{action\_dumbdevice}}$ sent by $k$, 
+$(\exists~ c_i \in C~|~\texttt{action\_dumbdevice} = c_i)~\wedge~$
+$ (\exists~ j \in \{1, 2, ..., m\}~|~ \mathit{\texttt{dumbdevice} = d_j)}~\wedge$\\$(\texttt{action} \in \{c_{j1}, c_{j2}, ..., c_{jl_j}\})$
 
 
 \subsection{Information flow policy}
 \label{subsec:information}
+This policy ensures that sensitive information from a smart home is not leaked to the outside world without user's permission or proper anonymization.
+This policy can be verified using a type system. If $d$ is some data that an device gathers from a smart home, it is annotated as \texttt{sensitive} or \texttt{non\_sensitive}. 
+Let $L_d$ denote a list of all the destinations to which $d$ may be sent. Then the policy states that if $d$ is not sensitive, then it may be sent to any of the allowed destinations. If it is sensitive, then before sending it anywhere, it should pass through the user's scrutiny. The user may either decide not to send it anywhere or to anonymize it before sending it to some destinations that seem fit. This is represented using an ordered pair, the first element of which describes the action to be performed, and the second element is a list of destinations allowed. The ordered pairs can be of two types, \vspace{-7pt}
+\begin{itemize}
+\itemsep0em 
+\item \texttt{(keep\_secret, [])}: if $d$ has to be kept secret, then the list of destinations will be an empty list.
+\item \texttt{(anonymize, [$D_1, D_2, ..., D_m$])}: first $d$ is anonymized and then it may be sent to one or more of these m ($\geq1$) destinations where $\{D_1, D_2, ..., D_m\} \subseteq L_d$. 
+\end{itemize}\vspace{-5pt}
+To summarize, \vspace{-10pt}
+\begin{itemize}
+\itemsep0em 
+\item $d.\mathit{type}= \mathit{sensitive} ~\wedge~ \mathit{USER\_DECISION}= (\mathit{keep\_secret}, []) \Rightarrow d.\mathit{destination} = []$
+\item $d.\mathit{type}= \mathit{sensitive} ~ \wedge ~ \mathit{USER\_DECISION}= (\mathit{anonymize}, [{D}_{1}, {D}_{2}, ..., {D}_{m}]) \Rightarrow \\ d.\mathit{is\_{anonymized} = true} ~\wedge~ \\ d.\mathit{destination} \in [{D}_{1}, {D}_{2}, ..., {D}_{m}]$ 
+\item $d.\mathit{type}= \mathit{non\_sensitive} \Rightarrow  d.\mathit{destination} \in L_d$ 
+\end{itemize}
 
-
-\subsection{Temporal policy}
-\label{subsec:time}
-
-\subsection{New device policy}
-\label{subsec:newdevice}
-In our smart home architecture, we classified the devices into three categories depending on the roles they play in the house. This classification allows us to narrow down the verification to the controllers only. 
-Since the sensors only broadcast changes in the values of the parameters they measure and do not have the ability to control any other device and the dumb devices are only capable of executing commands sent by the controllers, adding a new sensor or dumb device to the house does not require additional verification. 
-When a new controller is added to the house, it would require verification of the two policies defined earlier: the dependency and control policies of the new controller. 
-
-\noindent Let \texttt{verify\_dependency\_policy} and \texttt{verify\_control\_policy} be methods for verifying the dependency and control policies respectively.
-
-As long as all the existing controllers are already verified, only verifying the new controller ensures that the entire smart homes satisfies the dependency and control policies. Due to this, our methodology for specifying and verifying smart homes can scale to homes with a large number of devices.
 
 \section{Static Analysis}
 \label{sec:analysis}
@@ -228,7 +224,7 @@ We verify the following three properties using static analysis:
 \end{enumerate}
 
 \section{Implementation}
-The implementation has two parts: a prototype of the smart home architecture described in section~\S\ref{sec:archi} together with three smart systems based on it, and a static analyser that verifies whether the controllers in a smart system comply with their security policy specifications. The entire implementation is done in java. The smart home architecture implementation has approx. 1300 LOC\footnote{The code is here: https://gitlab.cs.washington.edu/cnandi/my-stuff} and the static analyser has approx. 300 LOC. Table~\ref{table:appliance_sensor} provides a summary of the three smart systems we implemented for benchmarking. 
+The implementation has two parts: a prototype of the smart home architecture described in section~\S\ref{sec:archi} together with three smart systems based on it, and a static analyser that verifies whether the controllers in a smart system comply with their security policy specifications. The entire implementation is done in java. The smart home architecture implementation has approx. 1300 LOC\footnote{The code is here: https://gitlab.cs.washington.edu/cnandi/my-stuff} and the static analyser has approx. 300 LOC. Table~\ref{table:appliance_sensor} provides a summary of the three smart systems we implemented for benchmarking. The policies are specified in xml format. \\
  
 For the static analysis tool, we built a checker on top of Google's error-prone framework~\cite{errorprone}. Error prone is a static analyser for Java and provides an API which can be used to develop different types of program analysis tools. As a part of the static analysis, we also developed a dataflow analysis for verifying the third item mentioned in section~\S\ref{sec:analysis}. The dataflow analyser parses the conditions inside the \texttt{if-statement} and its body, and compares them to the policies of the respective controller in the xml file and verifies if they are the correct conditions for the command being sent inside the body of the \texttt{if-statement}. 
 
