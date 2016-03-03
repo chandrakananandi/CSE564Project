@@ -120,7 +120,7 @@ Our threat model is a third-party device manufacturer, $X$, developing \textit{c
 In other words, we do not trust a controller developed by a third-party device manufacturer. 
 
 The trusted components are the \textit{watchdog organizations} and the \textit{platform providers}. As a result, we also consider the standards set by the former, and the specifications and the verification tools (and devices) developed by the latter to be trusted components.
-Only if a device manufactured by a \textit{third-party device manufacturer} is marked as ``certified" by a \textit{major organization} after verifying its implementation against the specifications, can it be trusted by an end user. 
+Only if a device manufactured by a \textit{third-party device manufacturer} is marked as ``certified" by a \textit{platform providers} after verifying its implementation against the specifications, can it be trusted by an end user. 
 The \textit{end users} who own the smart homes are themselves trusted to not attack their own homes for any reason. 
 
 The specification and verification of policies is done by the \textit{platform providers} and the development of the devices is done either by the \textit{platform providers} or \textit{third-party device manufacturers}. All the four groups described in section~\S\ref{subsec:roles} are stakeholders in this model. The \textit{end users} because they are directly affected by any security loophole and the other three organizations because their business will fail if they lose the trust of the \textit{end users}.
@@ -184,7 +184,7 @@ $}
 \subsection{Control policy}
 \label{subsec:control}
 We use the terms ``legal" and ``illegal" to refer to dumb devices which may and may not be controlled by a controller respectively and ``executable" and ``non-executable" to refer to commands that can and cannot be executed by a dumb device respectively. The only correct scenario is when a controller sends an ``executable" command to a ``legal" dumb device. 
-The control policy ensures that no other scenario happens. According to the specification of a controller defined by a \textit{major organization}, every controller $k$ has a list of $n > 0$ commands it can send: $ C = \{c_1, c_2, ..., c_n\}$. $k$ also maintains a list of $m \geq 0$ ``legal" dumb devices (this would be implemented by a device discovery mechanism) and for every dumb device $d_i$,  a set of $l_i > 0$ commands it may send to them. Let this list be represented as: \\ $D_{m}= \{(d_{1}, c_{11}), ..., (d_{1}, c_{1l_1}), (d_{2}, c_{21}), ..., (d_{2}, c_{2l_2}), ..., (d_{m}, c_{m1}), ..., (d_m, c_{ml_m})\}$. The control policy states that: $\forall~\mathit{\texttt{action\_dumbdevice}}$ sent by $k$, 
+The control policy ensures that no other scenario happens. According to the specification of a controller defined by a \textit{platform providers}, every controller $k$ has a list of $n > 0$ commands it can send: $ C = \{c_1, c_2, ..., c_n\}$. $k$ also maintains a list of $m \geq 0$ ``legal" dumb devices (this would be implemented by a device discovery mechanism) and for every dumb device $d_i$,  a set of $l_i > 0$ commands it may send to them. Let this list be represented as: \\ $D_{m}= \{(d_{1}, c_{11}), ..., (d_{1}, c_{1l_1}), (d_{2}, c_{21}), ..., (d_{2}, c_{2l_2}), ..., (d_{m}, c_{m1}), ..., (d_m, c_{ml_m})\}$. The control policy states that: $\forall~\mathit{\texttt{action\_dumbdevice}}$ sent by $k$, 
 $(\exists~ c_i \in C~|~\texttt{action\_dumbdevice} = c_i) \\ \wedge~$
 $ (\exists~ j \in \{1, 2, ..., m\}~|~ \mathit{\texttt{dumbdevice} = d_j)}~\wedge~(\texttt{action} \in \{c_{j1}, c_{j2}, ..., c_{jl_j}\})$
 
@@ -222,9 +222,9 @@ We verify the following three properties using static analysis:
     \item The clauses in the \texttt{if-statement} are correct according to the policy file of the respective controller. We implemented a dataflow analysis to verify this. Section~\ref{sec:impl} describes this in detail.\\
 \end{enumerate}
 
-To further elaborate the analysis, let us consider the example of the smart laundry system. Figure~\ref{fig:policy} shows the dependency policies for the laundry machine controller as defined by a \textit{major organization}, represented in xml format and figure~\ref{fig:code} shows an implementation of the \texttt{update()} method for the laundry machine controller. More than one parameter can be measured by a single sensor. To encode this feature there is a \texttt{class} attribute in the xml file which refers to an instance of a particular sensor.\\
+To further elaborate the analysis, let us consider the example of the smart laundry system. Figure~\ref{fig:policy} shows the dependency policies for the laundry machine controller as defined by a \textit{platform provider}, represented in xml format and figure~\ref{fig:code} shows an implementation of the \texttt{update()} method for the laundry machine controller. More than one parameter can be measured by a single sensor. To encode this feature there is a \texttt{class} attribute in the xml file which refers to an instance of a particular sensor.\\
 
-Consider the controller code to be implemented by a \textit{third-party device manufacturer} and given to the \textit{major organization} for integrating to their smart home platform. The latter will first verify the implementation against the specification shown in figure~\ref{fig:policy} and if it is successful, will mark the controller as ``certified" and allow it to be integrated with the platform.\\
+Consider the controller code to be implemented by a \textit{third-party device manufacturer} and given to the \textit{platform provider} for integrating to their smart home platform. The latter will first verify the implementation against the specification shown in figure~\ref{fig:policy} and if it is successful, will mark the controller as ``certified" and allow it to be integrated with the platform.\\
 
 \begin{figure}[h]
 \begin{center}
@@ -272,7 +272,7 @@ controller & commands & sensors & \#dependency \newline policies \\ \hline
 \end{table*}
 \item A static analyser that verifies whether the controllers in a smart system comply with their security policy specifications.
 \end{itemize}   
-From the implementation point of view, we first play the role of a \textit{major organization} and develop the APIs, formalize the specification language, and implement the verification tools. Then we play the role of the \textit{third-party device manufacturers} and develop three smart systems using the APIs. Finally, we again play the role of the \textit{major organization} and verify  the code of the controllers developed by the third parties.
+From the implementation point of view, we first play the role of a \textit{platform provider} and develop the APIs, formalize the specification language, and implement the verification tools. Then we play the role of the \textit{third-party device manufacturers} and develop three smart systems using the APIs. Finally, we again play the role of the \textit{platform provider} and verify  the code of the controllers developed by the third parties.
 
 The entire implementation is done in java. The smart home architecture together with the benchmarks (the three smart systems) has approx. 1300 LOC\footref{note1} and the static analyser has approx. 300 LOC\footref{note1}. To simulate the sensors measuring different parameters and updating the corresponding sensor variables, we use pseudorandom number generators in appropriate ranges. \\
 
