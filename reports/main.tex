@@ -212,7 +212,7 @@ Static analysis is a way to provide compile time guarantees that the code does n
 
 \begin{figure}[htpb]
 \begin{center}
-\includegraphics[scale=0.35, trim = 0 0 0 0]{results_update.png}
+\includegraphics[scale=0.35, trim = 0 1cm 0 1cm]{results_update.png}
 \caption{Execution times of the laundry machine controller with (PolicyEnforcedUpdate) and without(Update) dynamic policy enforcement over 100 simulations.}
 \label{fig:dynamic}
 \end{center}
@@ -234,7 +234,7 @@ Consider the controller code to be implemented by a \textit{third-party device m
 
 \begin{figure}[h]
 \begin{center}
-\includegraphics[scale=0.7, trim = 0 21.5cm 0 2cm]{policy.pdf}
+\includegraphics[scale=0.7, trim = 0 21.9cm 0 3cm]{policy.pdf}
 \caption{Dependency policies for the laundry machine controller.}
 \label{fig:policy}
 \end{center}
@@ -242,7 +242,7 @@ Consider the controller code to be implemented by a \textit{third-party device m
 
 \begin{figure}[h]
 \begin{center}
-\includegraphics[scale=0.7, trim = 0 21.5cm 0 2cm]{code.pdf}
+\includegraphics[scale=0.7, trim = 0 21.8cm 0 2.5cm]{code.pdf}
 \caption{\texttt{Update()} for the laundry machine controller. This is a correct implementation which is successfully verified against the policy.}
 \label{fig:code}
 \end{center}
@@ -255,19 +255,19 @@ The implementation has two parts:
 \item A simulation of the smart home architecture described in section~\S\ref{sec:archi} together with three smart systems that can be executed on top of it. Table~\ref{table:appliance_sensor} provides a summary of the three smart systems. 
 \begin{table*}[h]
 \begin{center}
-\begin{tabular}{|p{4cm}|p{5cm}|p{4.5cm}|p{3cm}|}
+\begin{tabular}{|p{4cm}|p{3cm}|p{4.5cm}|p{2cm}|}
 \hline
 controller & commands & sensors & \#dependency \newline policies \\ \hline
 \tiny{LAUNDRY\_MACHINE\_CONTROLLER} \tiny{ (for dumb device: laundry machine)} &
-\small start\_washer, \small stop\_washer & 
+\small start\_washer, \newline \small stop\_washer & 
 \tiny{IS\_WASHER\_ON}, \newline \tiny{IS\_EMPTY, \newline IS\_DOOR\_CLOSED, \newline IS\_CLEANED} & 2\\ \hline
 
 
 \tiny{GARAGE\_DOOR\_CONTROLLER} \tiny{(for dumb device: garage door)} & 
-\small{open\_garagedoor, close\_garagedoor}\tiny &  
+\small{open\_garagedoor, \newline close\_garagedoor}\tiny &  
 \tiny{IS\_GARAGE\_OPEN, \newline IS\_CAR\_INSIDE\_GARAGE, \newline IS\_CAR\_RUNNING, \newline IS\_OWNER\_INSIDE\_CAR,\newline CAR\_DISTANCE (double), \newline CAR\_SPEED (double)} & 4\\ \hline
 
-\tiny{THERMOSTAT} \tiny{(for dumb devices: room heater and air conditioner)} & 
+\tiny{THERMOSTAT} \tiny{(for dumb devices: room heater, air conditioner)} & 
 \small start\_roomheater,\newline \small stop\_roomheater,\newline\small start\_airconditioner, \newline \small stop\_airconditioner & 
 \tiny{IS\_ROOMHEATER\_ON}, \tiny{IS\_AIRCONDITIONER\_ON},
 \tiny{IS\_HOUSE\_EMPTY, \newline IS\_WINDOW\_OPEN, \newline IS\_DOOR\_OPEN, IS\_TEMP\_BELOW\_LOWERTHRESHOLD, IS\_TEMP\_ABOVE\_UPPERTHRESHOLD}, \tiny{OWNER\_DISTANCE (double)} & 8\\ \hline
@@ -287,13 +287,22 @@ We implemented our static analysis tool as a checker on top of Google's error-pr
 \begin{figure}[h]
 \begin{center}
 \includegraphics[scale=0.7, trim = 0 22cm 0 2cm]{verify1.pdf}
-\caption{Code snippet showing the verification algorithm}
+\caption{Code snippet showing the verification algorithm. If an error is detected during compilation, the analyser suggests possible fixes. }
 \label{fig:verify1}
 \end{center}
 \end{figure}
 
-
 \section{Results}
+We wrote several attacks in the form of \textit{evil} controllers and evaluated our system to see if it could detect the attacks at compile time. Table~\ref{table:results} summarizes our results.
+\begin{table*}[h]
+\begin{center}
+\begin{tabular}{|p{4cm}|p{3cm}|p{4.5cm}|p{2cm}|}
+\hline
+\end{tabular}
+\caption{\small{An example smart home with three smart systems. Each sensor variable has type boolean unless otherwise indicated in parentheses.}}
+\label{table:results}
+\end{center}
+\end{table*}
 
 \section{Conclusions and future work}
 In this project, we designed and implemented a simulation of a smart home and developed a static analyser for verifying that the smart systems in the smart home satisfy certain security and correctness policies. We also analysed the various stakeholders in the smart home business and assigned roles to different organizations such that the home owners can have a guarantee that their smart homes are secure. 
