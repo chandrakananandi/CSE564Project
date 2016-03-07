@@ -8,19 +8,19 @@
 \usepackage[utf8]{inputenc}
 \usepackage{footmisc}
 
-\title{\textbf{CSE 564 Project Report (Draft)} 
+\title{\textbf{Is Your Smart Home Secure?} 
 \\
 \begin{center}
-\LARGE{Is Your Smart Home Secure?}
+\LARGE{CSE 564 Project Report}
 \end{center}\vspace{-2ex}}
 \author{Jeanette Daum (jdaum), Chandrakana Nandi (cnandi) }
-\date{March 3, 2016}
+\date{March 14, 2016}
 
 \begin{document}
 
 \maketitle
 \begin{abstract}
-One of the applications of Internet of Things which is gaining popularity is Home Automation. These systems are typically made up of devices which can be controlled remotely by the home inhabitants or can communicate with each other and act autonomously. An objective for smart homes is ensuring their security and correctness because violation of these properties can directly affect the lives of the inhabitants. What if the controller of one device incorrectly sends commands to another device or sends the command to a device under incorrect conditions? In this project, we design and implement an abstract architecture for modelling smart homes in a way that makes it easier to reason about their security and correctness, define different types of policies and specify them for three different smart systems and develop a static analyzer that verifies whether the implementation of the smart systems complies with the specified policies. 
+One of the applications of Internet of Things which is gaining popularity is Home Automation. These systems are typically made up of devices which can be controlled remotely by the home inhabitants or can communicate with each other and act autonomously. An objective for smart homes is ensuring their security and correctness because violation of these properties can directly affect the lives of the inhabitants. What if the controller of one device incorrectly sends commands to another device or sends the command to a device under incorrect conditions? In this project, we design and implement an abstract architecture for modelling smart homes in a way that makes it easier to reason about their security and correctness, define different types of policies and specify them for three different smart systems, develop a static analyser that verifies whether the implementation of the smart systems complies with the specified policies and perform experiments to show what type of attacks our system can detect at compile time. 
 
 \end{abstract}
 \section{Introduction}
@@ -43,6 +43,12 @@ We defined a set of security policies and specified them for three different sma
   
 \section{Related work}
 Some researchers have suggested general solutions for ensuring security for smart homes such as choosing a stronger password for protecting the devices or modifying their security settings according to one's needs~\cite{semantec}. Such solutions rely on the user's awareness about security vulnerabilities and do not address the problems specific to smart homes such as devices with different functionalities interacting without user intervention. Hence they cannot guarantee that a smart home will always behave correctly. Another proposed solution~\cite{al2000secure} is based on dynamic enforcement. The problem with dynamic solutions is that if a security breach is encountered during execution, the service has to be stopped. This is not convenient from the user's point of view because it affects the reliability of the system. Further, as we show in section~\S\ref{sec:analysis}, enforcing security and correctness policies dynamically leads to an execution time overhead which is not desirable in home automation. Consider a situation where there is a fire in the house and the inhabitants want to evacuate as soon as possible. If there is dynamic policy checking, that might cause delay in the opening of the front door which can affect the physical safety of the people. 
+
+A recent paper~\cite{trillions} has proposed solutions based on network-level mechanisms. Their approach relies on crowd sourcing for identifying different types of attacks. This approach does not provide any strong guarantees and may easily fail if organizations don't publish all encountered attacks. 
+
+Another recent paper~\cite{googleIoT} proposes a data centric solution to privacy enforcement in IoT by giving users the ability to define custom privacy policies. This is similar to the idea we propose for data privacy in home automation but our approach is based on a type system which provides compile time guarantees that information is only sent to destinations permitted by the user. 
+
+
 In this paper, our idea is to specify security and correctness policies for the smart devices in a home and verify them statically thereby providing compile time guarantees that the entire smart home is secure and correct. In section~\S\ref{subsec:roles}, we describe in detail who is responsible for doing the verification according to our proposed model.
 
 \section{Architecture and stakeholders}
