@@ -293,13 +293,22 @@ We implemented our static analysis tool as a checker on top of Google's error-pr
 \end{figure}
 
 \section{Results}
-We wrote several attacks in the form of \textit{evil} controllers and evaluated our system to see if it could detect the attacks at compile time. Table~\ref{table:results} summarizes our results.
+We wrote several attacks in the form of \textit{evil} controllers and evaluated our system to see if it could detect the attacks at compile time. Table~\ref{table:results} summarizes our results. The tables shows the type of attacks the analysis can detect(marked by yes) and those that it cannot detect yet(marked by no). 
 \begin{table*}[h]
 \begin{center}
-\begin{tabular}{|p{4cm}|p{3cm}|p{4.5cm}|p{2cm}|}
+\begin{tabular}{|p{7cm}|p{3cm}|}
 \hline
+type of error & detect/not detect \\ \hline
+command sent inside wrong method with correct policies being checked & yes \\ \hline
+command sent inside wrong method without correct policies being checked & yes \\ \hline
+command sent inside right method without checking any policy & yes \\ \hline
+command sent inside right method with only some policies checked & yes \\ \hline
+some of the sensor values changed (boolean or otherwise) & yes \\ \hline
+controller checking wrong sensor values & yes \\ \hline
+controller sending a command its specification does not permit & yes \\ \hline 
+commands are sent in proper temporal order & no \\ \hline
 \end{tabular}
-\caption{\small{An example smart home with three smart systems. Each sensor variable has type boolean unless otherwise indicated in parentheses.}}
+\caption{\small{Types of attacks our analysis can detect at compile time. Yes indicates that an attacj are detected and no indicates that it is not detected.}}
 \label{table:results}
 \end{center}
 \end{table*}
