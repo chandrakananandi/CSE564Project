@@ -8,10 +8,10 @@
 \usepackage[utf8]{inputenc}
 \usepackage{footmisc}
 
-\title{\textbf{Is Your Smart Home Secure?} 
+\title{\textbf{Verifying Security for Smart Homes} 
 \\
 \begin{center}
-\LARGE{CSE 564 Project Report}
+\large{CSE 564 Project Report}
 \end{center}\vspace{-2ex}}
 \author{Jeanette Daum (jdaum), Chandrakana Nandi (cnandi) }
 \date{March 14, 2016}
@@ -24,9 +24,10 @@ One of the applications of Internet of Things which is gaining popularity is Hom
 
 \end{abstract}
 \section{Introduction}
-Home automation systems are a new trend that is just starting to gain momentum and will soon have a huge impact on our everyday lives~\cite{samsung, homekit, echo, wink, homeos}. Typically, these systems consist of devices interacting with each other. These devices can take actions autonomously or they can be controlled remotely by the home inhabitants. An example is a garage door that opens automatically whenever the car is within a certain distance, but also opens and closes when the user gives a remote command by pressing a button. 
+Home automation systems are a new trend that is just starting to gain momentum and will soon have a huge impact on our everyday lives~\cite{samsung, homekit, echo, wink, homeos}. Typically, these systems consist of devices interacting with each other. These devices can take actions autonomously or they can be controlled remotely by the home inhabitants. 
+%An example is a garage door that opens automatically whenever the car is within a certain distance, but also opens and closes when the user gives a remote command by pressing a button. 
 
-For our project, we consider a smart home to be a collection of interacting devices acting autonomously without requiring the user to intervene. Nowadays most of the existing systems require user interaction and remote control but we expect future systems to become more autonomous to further assist its inhabitants~\cite{homekit}.
+%For our project, we consider a smart home to be a collection of interacting devices acting autonomously without requiring the user to intervene. Nowadays most of the existing systems require user interaction and remote control but we expect future systems to become more autonomous to further assist its inhabitants~\cite{homekit}.
 
 A challenge for smart homes is to ensure that there are no security loopholes because they can be exploited by malicious attackers to take control of the house and harm the inhabitants~\cite{yoshi, jung}. For autonomous systems, security and correctness is even more crucial because the user relies on the system and may not have much control over it. Before smart homes become as widespread as smart phones are today, it is necessary for the home automation industry to address these concerns.
 
@@ -35,7 +36,7 @@ In this project, our goal is to ensure that a system of interacting smart device
 We have modelled a smart home as a collection of three types of devices: controllers, sensors and dumb-devices. The controllers send commands to the dumb-devices based on values of sensors which measure different parameters such as temperature, state of a dumb-device, etc. The dumb-devices simply execute the commands sent to them.
 We defined a set of security policies and specified them for three different smart systems: a smart laundry system, a smart garage door system and an HVAC system. We developed a static analyzer that verifies that the three smart systems adhere to their respective policies. By conducting a preliminary experiment explained in section~\S\ref{sec:analysis}, we show that for smart homes, dynamically enforcing security policies can lead to a large overhead which may affect the reliability of the system. This motivates our decision of doing static program verification to provide compile time guarantees that a smart home is secure. Our main contributions are:
 \begin{itemize}[topsep=0pt,itemsep=0ex,partopsep=1ex,parsep=1ex]
-    \item Designing a smart home architecture, implementing a prototype of the architecture and three smart systems based on it; a smart laundry system, a smart garage door, and an HVAC system.    
+    \item Designing a smart home architecture, implementing a prototype simulating the architecture and three smart systems based on it; a smart laundry system, a smart garage door, and an HVAC system.    
     \item Defining and formalizing different types of security and correctness policies and specifying one of them for the three smart systems.
     \item Developing and evaluating a static analysis tool for verifying the code of the smart systems.
     \item Analysing the roles played by different organizations/individuals in the smart home business and proposing a model for distributing the tasks of specification, implementation and verification among them.
@@ -86,21 +87,22 @@ In our high-level architecture, we abstract away the lower level details of a sm
 
 \subsection{Roles of different organizations}
 \label{subsec:roles}
-We consider the entire smart home business to comprise of four different groups playing different roles. We propose a hierarchical certification mechanism to ensure that smart homes satisfy certain security and correctness standards (similar to the app store model). The  mechanism is hierarchical so that it can scale to a very large number of manufacturers who are interested in developing smart devices.   
+We consider the entire smart home business to comprise of four different groups playing different roles. 
 \begin{itemize}[topsep=0pt,itemsep=0ex,partopsep=1ex,parsep=1ex]
-\item \textit{Watchdog organizations}: We propose organizations like \cite{eff} for specifying certain standards for smart homes. The organizations would define security, privacy and correctness specifications which should ideally be met by all smart devices. An example specification related to information flow could be that information from within the smart home should not be sent to the cloud without user permission. Another example of a specification related to access control could be that the controller of a certain category of devices may not control devices which do not fall in that category (a garage door and a coffee maker would not be in the same category). Yet another example of a specification related to sensor dependency could be that a controller may send a command only under certain sensor conditions.
+\item \textit{Watchdog organizations}: We propose organizations \cite{eff} for specifying certain standards for smart homes. The organizations would define security, privacy and correctness specifications which should ideally be met by all smart devices. An example specification related to information flow could be that information from within the smart home should not be sent to the cloud without user permission. Another example of a specification related to access control could be that the controller of a certain category of devices may not control devices which do not fall in that category (a garage door and a coffee maker would not be in the same category). Yet another example of a specification related to sensor dependency could be that a controller may send a command only under certain sensor conditions.
+
 \item \textit{Platform providers}: We define platform providers as companies such as Samsung~\cite{samsung}, Apple~\cite{homekit}, etc. who provide platforms (hubs or apps) for integrating different smart devices and communication protocols to make them interact with each other or allow the users to control them remotely. In our model, we consider these organizations to have their own methodology for specifying the standards defined by the \textit{watchdog organizations} and verifying devices against them. For example the methodology could be a domain specific language for specifying the policies and a type system for verifying them. 
-These organizations would be inspected by the \textit{watchdog organizations} and marked as ``certified" if the \textit{watchdog organizations} find that their mechanisms for specifying and verifying the standards are acceptable.
+The specification and verification tools developed by these organizations would be inspected by the \textit{watchdog organizations} and marked as ``certified" if the \textit{watchdog organizations} find that their methodologies are acceptable. How the watchdog organizations carry out the inspection is outside the scope of this project. 
 
 
-\item \textit{Third-party device manufacturers}: They are the companies like Philips, Withings and numerous other small manufacturers who develop \textit{controllers}, \textit{dumb-devices} and \textit{sensors}~\cite{workswithsmartthings, workswithhomekit} which can be integrated to the platforms developed by the \textit{platform providers}. The latter themselves can also be device manufacturers; both Samsung and Apple manufacture their own smart devices. 
+\item \textit{Third-party device manufacturers}: They are the companies like Philips and Withings who develop \textit{controllers}, \textit{dumb-devices} and \textit{sensors}~\cite{workswithsmartthings, workswithhomekit} which can be integrated to the platforms developed by the \textit{platform providers}. The latter themselves can also be device manufacturers; both Samsung and Apple manufacture their own smart devices. 
 The \textit{platform providers} would release APIs for implementing devices which can be used by third-party device manufacturers so that their products can be integrated to the platforms of the former.
 Before  allowing any device manufactured by a third party to be integrated to their platform, the platform providers must verify the code against the specifications. The devices that pass the verification would be marked as ``certified" and may be trusted. 
 
-\item \textit{End users}: They are the home inhabitants who own (or want to own) a smart home. An end user might want to buy a hub (or app) from one of the existing \textit{platform providers} to plug in different smart devices bought either from the \textit{platform providers} or from some \textit{third-party device manufacturer} and convert their ordinary home to a smart home. As long as the devices are marked as ``certified" by one of the \textit{platform providers}, the end user can trust them due to the hierarchical certification mechanism.
+\item \textit{End users}: They are the home inhabitants who reside in a smart home. An end user might want to buy a hub (or app) from one of the existing \textit{platform providers} to plug in different smart devices bought either from the \textit{platform providers} or from some \textit{third-party device manufacturer} and convert their ordinary home to a smart home. As long as the devices are marked as ``certified" by one of the \textit{platform providers}, the end user can trust them.
 \end{itemize}
 
-
+We propose a hierarchical certification mechanism to ensure that smart homes satisfy certain security and correctness standards (similar to the app store model). The  mechanism is hierarchical so that it can scale to a very large number of manufacturers who are interested in developing smart devices. The watchdog organizations certify the specification and verification tools developed by the platform providers. The platform providers verify their platforms (and devices they manufacture) and devices manufactured by third-party manufacturers using their tools.     
 
 %Verification of the policies we defined ensures that (a) a controller does not send commands to a dumb device it owns under the wrong conditions, (b) it only send correct commands to the correct dumb devices, and (c) adding a new device to the house does not violate any security or correctness policy. \\
 
@@ -120,14 +122,19 @@ Before  allowing any device manufactured by a third party to be integrated to th
 
 \section{Threat model}
 \label{sec:threat}
-These days, there are numerous third party manufacturers developing smart devices. Many of these devices do not come with any security or correctness guarantees but home owners still buy them because they are not aware of the security threats vulnerable smart devices pose. Additionally, devices which do not have any guarantees tend to be cheaper and provide a way to convert an ordinary home to a smart home without spending too much money. \\
+%These days many devices do not come with any security or correctness guarantees but home owners still buy them because they are not aware of the security threats vulnerable smart devices pose. Additionally, devices which do not have any guarantees tend to be cheaper and provide a way to convert an ordinary home to a smart home without spending too much money. \\
 
-Our threat model is a third-party device manufacturer, $X$, developing \textit{controllers} which can be exploited to send commands to dumb-devices under incorrect sensor conditions. An attacker who is aware of the fact that the controller is bought from $X$ and knows that it has security vulnerabilities can exploit it to make the smart home behave in unexpected ways. For example, consider a garage door which is only supposed to open when the owner's car is within 50m from it. If its controller is ``faulty" in the sense that it sends commands to the garage door under arbitrary sensor conditions such as whenever a car is within 50m from it, irrespective of whether the home owner (or another authorized person) is driving it, then an attacker can gain easy access to the house through the garage door. 
-In other words, we do not trust a controller developed by a third-party device manufacturer. 
+Our threat model does not trust \textit{controllers} developed by a third-party device manufacturer, $X$. An attacker who is aware of the fact that the controller is bought from $X$ and knows that it has security vulnerabilities can exploit it to make the smart home behave in the following unexpected ways:
+\begin{itemize}[topsep=0pt,itemsep=-1ex,partopsep=1ex,parsep=1ex]
+\item send commands to dumb-devices under incorrect sensor conditions
+\item send wrong commands to the dumb-devices it controls or right/wrong commands to dumb-devices it does not control
+\item misuse the sensor values
+\end{itemize}
+For example, consider a garage door which is only supposed to open when the owner's car is within 50m from it. If its controller is ``faulty" in the sense that it sends commands to the garage door under arbitrary sensor conditions such as whenever a car is within 50m from it, irrespective of whether the home owner (or another authorized person) is driving it, then an attacker can gain easy access to the house through the garage door. 
 
-The trusted components are the \textit{watchdog organizations} and the \textit{platform providers}. As a result, we also consider the standards set by the former, and the specifications and the verification tools (and devices) developed by the latter to be trusted components.
-Only if a device manufactured by a \textit{third-party device manufacturer} is marked as ``certified" by a \textit{platform providers} after verifying its implementation against the specifications, can it be trusted by an end user. 
-The \textit{end users} who own the smart homes are themselves trusted to not attack their own homes for any reason. 
+
+The \textit{watchdog organizations} are trusted. This means that if a \textit{watchdog organization} certifies the tools developed by a \textit{platform provider} and if the \textit{platform provider} certifies a device manufactured by a \textit{third-party manufacturer}, the end user can trust that device to not have any security vulnerabilities.
+The \textit{end users} are themselves trusted to not attack their own homes for any reason. 
 
 The specification and verification of policies is done by the \textit{platform providers} and the development of the devices is done either by the \textit{platform providers} or \textit{third-party device manufacturers}. All the four groups described in section~\S\ref{subsec:roles} are stakeholders in this model. The \textit{end users} because they are directly affected by any security loophole and the other three organizations because their business will fail if they lose the trust of the \textit{end users}.
 
@@ -296,25 +303,27 @@ We implemented our static analysis tool as a checker on top of Google's error-pr
 We wrote several attacks in the form of \textit{evil} controllers and evaluated our system to see if it could detect the attacks at compile time. Table~\ref{table:results} summarizes our results. The tables shows the type of attacks the analysis can detect(marked by yes) and those that it cannot detect yet(marked by no). 
 \begin{table*}[h]
 \begin{center}
-\begin{tabular}{|p{7cm}|p{3cm}|}
+\begin{tabular}{|p{7cm}|p{1cm}|}
 \hline
-type of error & detect/not detect \\ \hline
+types of errors & success \\ \hline
 command sent inside wrong method with correct policies being checked & yes \\ \hline
 command sent inside wrong method without correct policies being checked & yes \\ \hline
 command sent inside right method without checking any policy & yes \\ \hline
-command sent inside right method with only some policies checked & yes \\ \hline
+command sent inside right method with only some or wrong policies checked & yes \\ \hline
 some of the sensor values changed (boolean or otherwise) & yes \\ \hline
 controller checking wrong sensor values & yes \\ \hline
 controller sending a command its specification does not permit & yes \\ \hline 
 commands are sent in proper temporal order & no \\ \hline
+commands are sent to only those dumb devices that can execute them & no \\\hline
+wrong sensor values being indirectly set in the code & no \\\hline
 \end{tabular}
-\caption{\small{Types of attacks our analysis can detect at compile time. Yes indicates that an attacj are detected and no indicates that it is not detected.}}
+\caption{\small{Types of attacks our analysis can detect at compile time.}}
 \label{table:results}
 \end{center}
 \end{table*}
 
 \section{Conclusions and future work}
-In this project, we designed and implemented a simulation of a smart home and developed a static analyser for verifying that the smart systems in the smart home satisfy certain security and correctness policies. We also analysed the various stakeholders in the smart home business and assigned roles to different organizations such that the home owners can have a guarantee that their smart homes are secure. 
+In this project, we designed and implemented a simulation of a smart home and developed a static analyser for verifying that the controllers in the smart home satisfy certain security and correctness policies. We also analysed the various stakeholders in the smart home business and assigned roles to different organizations such that the home owners can have a guarantee that their smart homes are secure. Currenly, our static analysis performs syntactic checks and as a result, many complex attacks cannot be detected by it yet as mentioned in table~\ref{table:results}. 
 
 We focused only on specifying and verifying the dependency policies for smart homes. As mentioned in section~\S\ref{sec:policies}, there are various other security and correctness policies that are important. As a part of the future work, we plan to verify those other policies and also relax our assumption that the dumb-devices and sensors are trusted. We would also like to extend our prototype to integrate it with some real devices and do an extensive evaluation.
 \section{Acknowledgements}
