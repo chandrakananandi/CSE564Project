@@ -124,11 +124,11 @@ We propose a hierarchical certification mechanism to ensure that smart homes sat
 \label{sec:threat}
 %These days many devices do not come with any security or correctness guarantees but home owners still buy them because they are not aware of the security threats vulnerable smart devices pose. Additionally, devices which do not have any guarantees tend to be cheaper and provide a way to convert an ordinary home to a smart home without spending too much money. \\
 
-Our threat model does not trust \textit{controllers} developed by a third-party device manufacturer, $X$. An attacker who is aware of the fact that the controller is bought from $X$ and knows that it has security vulnerabilities can exploit it to make the smart home behave in the following unexpected ways:
+Our threat model does not trust \textit{controllers} developed by a third-party device manufacturer, $X$. It also does not trust the \textit{sensors}; they can be compromised and their measurements can misused by attackers. Thus, an attacker who is aware of the fact that the controller is bought from $X$ and knows that it has security vulnerabilities can exploit it to make the smart home behave in the following unexpected ways:
 \begin{itemize}[topsep=0pt,itemsep=-1ex,partopsep=1ex,parsep=1ex]
 \item send commands to dumb-devices under incorrect sensor conditions
 \item send wrong commands to the dumb-devices it controls or right/wrong commands to dumb-devices it does not control
-\item misuse the sensor values
+\item misuse the sensor values by sending them to the cloud without permission from the end users.
 \end{itemize}
 For example, consider a garage door which is only supposed to open when the owner's car is within 50m from it. If its controller is ``faulty" in the sense that it sends commands to the garage door under arbitrary sensor conditions such as whenever a car is within 50m from it, irrespective of whether the home owner (or another authorized person) is driving it, then an attacker can gain easy access to the house through the garage door. 
 
@@ -138,7 +138,7 @@ The \textit{end users} are themselves trusted to not attack their own homes for 
 
 The specification and verification of policies is done by the \textit{platform providers} and the development of the devices is done either by the \textit{platform providers} or \textit{third-party device manufacturers}. All the four groups described in section~\S\ref{subsec:roles} are stakeholders in this model. The \textit{end users} because they are directly affected by any security loophole and the other three organizations because their business will fail if they lose the trust of the \textit{end users}.
 
- To further scope our research for this project, we assume that the sensors and dumb-devices are not compromised and that the former always store the latest values of the properties they measure. We also assume that the dumb devices trust the commands they receive from the controllers and atomically execute them. Additionally, we consider the communication protocol to be trusted and do not focus on man-in-the-middle attacks.
+To further scope our research for this project, we assume that the dumb-devices are not compromised, and trust the commands they receive from the controllers and atomically execute them. Additionally, we consider the communication protocol to be trusted and do not focus on man-in-the-middle attacks.
 % policies are safe/cannot be compromised
 % focus on attacks that compromise controllers by malicious parties -> try to control the dumb device illegally through the controller
 % sensors are not compromised, always updating % broadcasting the latest sensor values
@@ -224,7 +224,7 @@ Static analysis is a way to provide compile time guarantees that the code does n
 \label{fig:dynamic}
 \end{center}
 \end{figure}
-As we explained in section~\ref{subsec:roles}, the verification is done by the \textit{platform providers}. They release APIs which are used by the third-party manufacturers to develop different types of devices so that they can be integrated to the platforms.  
+As we explained in section~\ref{subsec:roles}, the verification is done by the \textit{platform providers}. They release APIs which are used by the third-party manufacturers to develop different types of devices so that they can be integrated to the platforms. Before allowing the integration, they run their verification tools on the code of the devices to ensure that they meet the specifications.
 
 To explain the analysis, we first give a brief description of how we implemented our smart home simulation. As we saw earlier, there are three types of devices: controllers, sensors and dumb devices. The controllers send commands to the dumb devices depending on the values of one or more sensors. The sensor-controller dependency is implemented as an observer-pattern: the sensors are subjects and controllers are observers. A controller can be the observer of multiple sensors. Whenever a sensor updates the value of a variable (due to change in the value of the parameter it measures), it notifies all its observers. Whenever an observer (controller) is notified, it invokes an \texttt{update()} method inside which it sends a command to a dumb-device, after checking whether the latter can execute the command. This is done by invoking a method: \texttt{checkExecutabilityAndSend(new Command("action\_dumbdevice"))}. 
 We verify the following three properties using static analysis:
@@ -232,7 +232,7 @@ We verify the following three properties using static analysis:
     \item A command is sent only within an \texttt{update()} method, i.e. \\
     \texttt{checkExecutabilityAndSend(new Command("action\_dumbdevice"))} is always invoked inside the \texttt{update()} method. This is verified by checking that the latter is the node enclosing the former.
     \item A command is sent only after checking certain conditions inside an \texttt{if-statement}. Similar to the above, this is verified by checking that \texttt{checkExecutabilityAndSend(new Command("action\_dumbdevice"))} is enclosed by an \texttt{if} node.
-    \item The clauses in the \texttt{if-statement} are correct according to the policy file of the respective controller. We implemented a dataflow analysis to verify this. Section~\ref{sec:impl} describes this in detail.\\
+    \item The clauses in the \texttt{if-statement} are correct according to the policy file of the respective controller. Section~\ref{sec:impl} describes this in detail.\\
 \end{enumerate}
 
 To further elaborate the analysis, let us consider the example of the smart laundry system. Figure~\ref{fig:policy} shows the dependency policies for the laundry machine controller as defined by a \textit{platform provider}, represented in xml format and figure~\ref{fig:code} shows an implementation of the \texttt{update()} method for the laundry machine controller. More than one parameter can be measured by a single sensor. To encode this feature there is a \texttt{class} attribute in the xml file which refers to an instance of a particular sensor.\\
@@ -287,11 +287,11 @@ controller & commands & sensors & \#dependency \newline policies \\ \hline
 \end{itemize}   
 From the implementation point of view, we first play the role of a \textit{platform provider} and develop the APIs, formalize the specification language, and implement the verification tools. Then we play the role of the \textit{third-party device manufacturers} and develop three smart systems using the APIs. Finally, we again play the role of the \textit{platform provider} and verify  the code of the controllers developed by the third parties.
 
-The entire implementation is done in java. The smart home architecture together with the benchmarks (the three smart systems) has approx. 1300 LOC\footref{note1} and the static analyser has approx. 300 LOC\footref{note1}. To simulate the sensors measuring different parameters and updating the corresponding sensor variables, we use pseudorandom number generators in appropriate ranges. \\
+The entire implementation is done in java. The smart home architecture together with the benchmarks (the three smart systems) has approx. 2000 LOC\footref{note1} and the static analyser has approx. 300 LOC\footref{note1}. To simulate the sensors measuring different parameters and updating the corresponding sensor variables, we use pseudorandom number generators in appropriate ranges. \\
 
 
 We implemented our static analysis tool as a checker on top of Google's error-prone framework~\cite{errorprone}. Error prone is a static analyser for Java and provides an API which can be used to develop different types of program analysis tools. 
-Our analysis verifies the third item mentioned in section~\S\ref{sec:analysis}. It parses the conditions checked in the \texttt{if-statement} and the statements inside its body to find the command being sent, searches for the policy file (represented in xml format) of the controller, compares the conditions to the policies (sensor values or range of values) in that file, and verifies that the conditions match with those in the policy file for the command being sent inside the body. Figure~\ref{fig:verify1} shows a snippet of the verification code. The verification of the clauses in the \texttt{if-statement} is done inside the \texttt{SEND\_ENCLOSEDBY\_IF} matcher.
+To verify the third item mentioned in section~\S\ref{sec:analysis}, our tool parses the controller code to analyse the conditions checked in the \texttt{if-statement} and the statements inside its body to find the command being sent. It then searches for the policy file  of the controller and verifies that the command exists in the file. Then, it compares the if-conditions to the policies (sensor values or range of values) in that file, and verifies that the conditions match with those in the policy file for the command being sent inside the body. Figure~\ref{fig:verify1} shows a snippet of the verification code. The verification of the clauses in the \texttt{if-statement} is done inside the \texttt{SEND\_ENCLOSEDBY\_IF} matcher.
 \begin{figure}[h]
 \begin{center}
 \includegraphics[scale=0.7, trim = 0 22cm 0 2cm]{verify1.pdf}
@@ -326,7 +326,7 @@ wrong sensor values being indirectly set in the code & no \\\hline
 \section{Conclusions and future work}
 In this project, we designed and implemented a simulation of a smart home and developed a static analyser for verifying that the controllers in the smart home satisfy certain security and correctness policies. We also analysed the various stakeholders in the smart home business and assigned roles to different organizations such that the home owners can have a guarantee that their smart homes are secure. Currenly, our static analysis performs syntactic checks and as a result, many complex attacks cannot be detected by it yet as mentioned in table~\ref{table:results}. 
 
-We focused only on specifying and verifying the dependency policies for smart homes. As mentioned in section~\S\ref{sec:policies}, there are various other security and correctness policies that are important. As a part of the future work, we plan to verify those other policies and also relax our assumption that the dumb-devices and sensors are trusted. We would also like to extend our prototype to integrate it with some real devices and do an extensive evaluation.
+We focused only on specifying and verifying the dependency policies for smart homes. As mentioned in section~\S\ref{sec:policies}, there are various other security and correctness policies that are important. As a part of the future work, we plan to verify those other policies and also relax our assumption that the dumb-devices are trusted. We would also like to extend our prototype to integrate it with some real devices and do an extensive evaluation.
 \section{Acknowledgements}
 We would like to thank Mike Ernst for his valuable feedback on the ideas and the implementation, and Suzanne Millstein and Konstantin Weitz for their help in figuring out the right tools for doing the verification.
 \bibliographystyle{abbrv}
