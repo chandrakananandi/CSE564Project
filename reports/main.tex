@@ -47,7 +47,7 @@ Some researchers have suggested general solutions for ensuring security for smar
 
 A recent paper~\cite{trillions} has proposed solutions based on network-level mechanisms. Their approach relies on crowd sourcing for identifying different types of attacks. This approach does not provide any strong guarantees and may easily fail if organizations don't publish all encountered attacks. 
 
-Another recent paper~\cite{googleIoT} proposes a data centric solution to privacy enforcement in IoT by giving users the ability to define custom privacy policies. This is similar to the idea we propose for data privacy in home automation but our approach is based on a type system which provides compile time guarantees that information is only sent to destinations permitted by the user. 
+Another recent paper~\cite{googleIoT} proposes a data centric solution to privacy enforcement in IoT by giving users the ability to define custom privacy policies. This is similar to the idea we propose for data privacy in home automation but unlike their approach, ours is based on a type system which provides compile time guarantees that information is only sent to destinations permitted by the user. 
 
 
 In this paper, our idea is to specify security and correctness policies for the smart devices in a home and verify them statically thereby providing compile time guarantees that the entire smart home is secure and correct. In section~\S\ref{subsec:roles}, we describe in detail who is responsible for doing the verification according to our proposed model.
@@ -185,12 +185,12 @@ The generic structure of the above two types of policies are respectively:
 \item  The garage door opens if and only if it is closed, the owner is inside the car, and the car is either approaching nearby or running within the garage. \vspace{.1cm}
 
 \small{
-$\mathit {GARAGE\_DOOR\_CONTROLLER ~\textbf{sends}~open\_garagedoor}\Leftrightarrow \\ \mathit{(\neg IS\_GARAGE\_OPEN)} \wedge \mathit{((\neg IS\_CAR\_INSIDE\_GARAGE}~ \wedge~ \mathit{CAR\_DISTANCE \leq ``50m"} \wedge \mathit{CAR\_SPEED \neq 0)} \\ \hspace*{0.5cm}\vee \mathit{(IS\_CAR\_INSIDE\_GARAGE} \wedge \mathit{IS\_CAR\_RUNNING))}  \wedge \mathit{(IS\_OWNER\_INSIDE\_CAR)} 
+$\mathit {GARAGEDOOR\_CONTROLLER ~\textbf{sends}~open\_garagedoor}\Leftrightarrow \\ \mathit{(\neg IS\_GARAGE\_OPEN)} \wedge \mathit{((\neg IS\_CAR\_INSIDE\_GARAGE}~ \wedge~ \mathit{CAR\_DISTANCE \leq ``50m"} \wedge \mathit{CAR\_SPEED \neq 0)} \\ \hspace*{0.5cm}\vee \mathit{(IS\_CAR\_INSIDE\_GARAGE} \wedge \mathit{IS\_CAR\_RUNNING))}  \wedge \mathit{(IS\_OWNER\_INSIDE\_CAR)} 
 $}
 
 \normalsize\item The laundry machine \textit{may} start when the doors are closed, the machine is not empty, the clothes are not already clean, and the machine is not already running.\vspace{.1cm}
 
-\small{$\mathit{LAUNDRY\_MACHINE\_CONTROLLER} ~\textbf{sends}~ \mathit{start\_washer}~\Rightarrow
+\small{$\mathit{LAUNDRYMACHINE\_CONTROLLER} ~\textbf{sends}~ \mathit{start\_washer}~\Rightarrow
 \mathit{(IS\_DOOR\_CLOSED)} \wedge \mathit{(\neg IS\_EMPTY)}\\ \wedge \mathit{(\neg IS\_CLEAN)} \wedge \mathit{(\neg IS\_WASHER\_ON)}  $}
 \end{itemize}
 
@@ -290,7 +290,8 @@ From the implementation point of view, we first play the role of a \textit{platf
 The entire implementation is done in java. The smart home architecture together with the benchmarks (the three smart systems) has approx. 1300 LOC\footref{note1} and the static analyser has approx. 300 LOC\footref{note1}. To simulate the sensors measuring different parameters and updating the corresponding sensor variables, we use pseudorandom number generators in appropriate ranges. \\
 
 
-We implemented our static analysis tool as a checker on top of Google's error-prone framework~\cite{errorprone}. Error prone is a static analyser for Java and provides an API which can be used to develop different types of program analysis tools. As a part of the static analysis, we also developed a dataflow analysis for verifying the third item mentioned in section~\S\ref{sec:analysis}. The dataflow analyser parses the conditions checked in the \texttt{if-statement} and the statements inside its body to find the command being sent, searches for the policy file (represented in xml format) of the controller, compares the conditions to the policies (sensor values or range of values) in that file, and verifies that the conditions match with those in the policy file for the command being sent inside the body. Figure~\ref{fig:verify1} shows a snippet of the verification code. The verification of the clauses in the \texttt{if-statement} is done inside the \texttt{SEND\_ENCLOSEDBY\_IF} matcher.
+We implemented our static analysis tool as a checker on top of Google's error-prone framework~\cite{errorprone}. Error prone is a static analyser for Java and provides an API which can be used to develop different types of program analysis tools. 
+Our analysis verifies the third item mentioned in section~\S\ref{sec:analysis}. It parses the conditions checked in the \texttt{if-statement} and the statements inside its body to find the command being sent, searches for the policy file (represented in xml format) of the controller, compares the conditions to the policies (sensor values or range of values) in that file, and verifies that the conditions match with those in the policy file for the command being sent inside the body. Figure~\ref{fig:verify1} shows a snippet of the verification code. The verification of the clauses in the \texttt{if-statement} is done inside the \texttt{SEND\_ENCLOSEDBY\_IF} matcher.
 \begin{figure}[h]
 \begin{center}
 \includegraphics[scale=0.7, trim = 0 22cm 0 2cm]{verify1.pdf}
