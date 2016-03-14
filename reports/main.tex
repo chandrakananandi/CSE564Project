@@ -232,7 +232,7 @@ We verify the following three properties using static analysis:
     \item A command is sent only within an \texttt{update()} method, i.e. \\
     \texttt{checkExecutabilityAndSend(new Command("action\_dumbdevice"))} is always invoked inside the \texttt{update()} method. This is verified by checking that the latter is the node enclosing the former.
     \item A command is sent only after checking certain conditions inside an \texttt{if-statement}. Similar to the above, this is verified by checking that \texttt{checkExecutabilityAndSend(new Command("action\_dumbdevice"))} is enclosed by an \texttt{if} node.
-    \item The clauses in the \texttt{if-statement} are correct according to the policy file of the respective controller. Section~\ref{sec:impl} describes this in detail.\\
+    \item The predicate is correct according to the policy file of the respective controller. Section~\ref{sec:impl} describes this in detail.\\
 \end{enumerate}
 
 To further elaborate the analysis, let us consider the example of the smart laundry system. Figure~\ref{fig:policy} shows the dependency policies for the laundry machine controller as defined by a \textit{platform provider}, represented in xml format and figure~\ref{fig:code} shows an implementation of the \texttt{update()} method for the laundry machine controller. More than one parameter can be measured by a single sensor. To encode this feature there is a \texttt{class} attribute in the xml file which refers to an instance of a particular sensor.\\
@@ -291,7 +291,7 @@ The entire implementation is done in java. The smart home architecture together 
 
 
 We implemented our static analysis tool as a checker on top of Google's error-prone framework~\cite{errorprone}. Error prone is a static analyser for Java and provides an API which can be used to develop different types of program analysis tools. 
-To verify the third item mentioned in section~\S\ref{sec:analysis}, our tool parses the controller code to analyse the conditions checked in the \texttt{if-statement} and the statements inside its body to find the command being sent. It then searches for the policy file  of the controller and verifies that the command exists in the file. Then, it compares the if-conditions to the policies (sensor values or range of values) in that file, and verifies that the conditions match with those in the policy file for the command being sent inside the body. Figure~\ref{fig:verify1} shows a snippet of the verification code. The verification of the clauses in the \texttt{if-statement} is done inside the \texttt{SEND\_ENCLOSEDBY\_IF} matcher.
+To verify the predicates mentioned in section~\S\ref{sec:analysis}, our tool parses the controller code to analyse the predicate in the \texttt{if-statement} and its body to find the command being sent. It then searches for the policy file  of the controller and verifies that the command exists in the file. It compares the predicates to the policies (sensor values or range of values) in that file, and verifies that they match with those in the policy file for the command being sent inside the body. Figure~\ref{fig:verify1} shows a snippet of the verification code. The verification of the clauses in the \texttt{if-statement} is done inside the \texttt{SEND\_ENCLOSEDBY\_IF} matcher.
 \begin{figure}[h]
 \begin{center}
 \includegraphics[scale=0.7, trim = 0 22cm 0 2cm]{verify1.pdf}
@@ -324,9 +324,10 @@ wrong sensor values being indirectly set in the code & no \\\hline
 \end{table*}
 
 \section{Conclusions and future work}
-In this project, we designed and implemented a simulation of a smart home and developed a static analyser for verifying that the controllers in the smart home satisfy certain security and correctness policies. We also analysed the various stakeholders in the smart home business and assigned roles to different organizations such that the home owners can have a guarantee that their smart homes are secure. Currenly, our static analysis performs syntactic checks and as a result, many complex attacks cannot be detected by it yet as mentioned in table~\ref{table:results}. 
+In this project, we designed and implemented a simulation of a smart home and developed a static analyser for verifying that the controllers in the smart home satisfy certain security and correctness policies. We also analysed the various stakeholders in the smart home business and assigned roles to different organizations such that the home owners can have a guarantee that their smart homes are secure. 
 
-We focused only on specifying and verifying the dependency policies for smart homes. As mentioned in section~\S\ref{sec:policies}, there are various other security and correctness policies that are important. As a part of the future work, we plan to verify those other policies and also relax our assumption that the dumb-devices are trusted. We would also like to extend our prototype to integrate it with some real devices and do an extensive evaluation.
+Currently, our static analysis performs syntactic checks and as a result, many complex attacks cannot be detected by it yet as mentioned in table~\ref{table:results}. 
+We focused only on verifying the dependency policies for smart homes. As mentioned in section~\S\ref{sec:policies}, there are various other security and correctness policies that are important. As a part of the future work, we plan to verify those other policies. We would also like to extend our prototype to integrate it with some real devices and do an extensive evaluation.
 \section{Acknowledgements}
 We would like to thank Mike Ernst for his valuable feedback on the ideas and the implementation, and Suzanne Millstein and Konstantin Weitz for their help in figuring out the right tools for doing the verification.
 \bibliographystyle{abbrv}
