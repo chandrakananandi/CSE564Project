@@ -124,7 +124,7 @@ We propose a hierarchical certification mechanism to ensure that smart homes sat
 \label{sec:threat}
 %These days many devices do not come with any security or correctness guarantees but home owners still buy them because they are not aware of the security threats vulnerable smart devices pose. Additionally, devices which do not have any guarantees tend to be cheaper and provide a way to convert an ordinary home to a smart home without spending too much money. \\
 
-Our threat model does not trust \textit{controllers} developed by a third-party device manufacturer, $X$. It also does not trust the \textit{sensors}; they can be compromised and their measurements can misused by attackers. Thus, an attacker who is aware of the fact that the controller is bought from $X$ and knows that it has security vulnerabilities can exploit it to make the smart home behave in the following unexpected ways:
+Our threat model does not trust \textit{controllers} developed by a third-party device manufacturer, $X$. It also does not trust the \textit{sensors}; they can be compromised and their measurements can be misused by attackers. Thus, an attacker who is aware of the fact that the controller is bought from $X$ and knows that it has security vulnerabilities can exploit them to make the smart home behave in the following unexpected ways:
 \begin{itemize}[topsep=0pt,itemsep=-1ex,partopsep=1ex,parsep=1ex]
 \item send commands to dumb-devices under incorrect sensor conditions
 \item send wrong commands to the dumb-devices it controls or right/wrong commands to dumb-devices it does not control
@@ -301,7 +301,7 @@ To verify the predicates mentioned in section~\S\ref{sec:analysis}, our tool par
 \end{figure}
 
 \section{Results}
-We wrote several attacks in the form of \textit{evil} controllers and evaluated our system to see if it could detect the attacks at compile time. Table~\ref{table:results} summarizes our results. The tables shows the type of attacks the analysis can detect(marked by yes) and those that it cannot detect yet(marked by no). 
+We wrote 14 attacks in the form of \textit{evil} controllers and evaluated our system to see if it could detect the attacks at compile time. Table~\ref{table:results} summarizes our results. The tables shows the type of attacks the analysis can detect(marked by yes) and those that it cannot detect yet(marked by no). 
 \begin{table*}[h]
 \begin{center}
 \begin{tabular}{|p{7cm}|p{1cm}|}
